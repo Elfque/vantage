@@ -3,253 +3,98 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
-import Input from "@/components/Input";
 import Textarea from "@/components/Textarea";
 import AppLayout from "@/components/layout/AppLayout";
-
-interface ResumeData {
-  personalInfo: {
-    fullName: string;
-    email: string;
-    phone: string;
-    location: string;
-    linkedin: string;
-    website: string;
-  };
-  summary: string;
-  experience: Array<{
-    id: string;
-    company: string;
-    position: string;
-    startDate: string;
-    endDate: string;
-    description: string;
-  }>;
-  education: Array<{
-    id: string;
-    institution: string;
-    degree: string;
-    field: string;
-    graduationDate: string;
-  }>;
-  skills: string[];
-  projects: Array<{
-    id: string;
-    name: string;
-    description: string;
-    technologies: string;
-    link: string;
-  }>;
-}
+import {
+  ResumeData,
+  ResumeEducation,
+  ResumeExperience,
+  ResumeProject,
+  ResumeSkill,
+} from "@/types/resume";
+import PersonalInfo from "@/components/resumes/PersonalInfo";
+import Experiences from "@/components/resumes/Experiences";
+import Projects from "@/components/resumes/Projects";
+import Education from "@/components/resumes/Education";
+import Header from "@/components/layout/Header";
+import { postAPIRequest } from "@/utils/requests";
+import { showErrorToast, showSuccessToast } from "@/utils/ToasterProps";
+import Skills from "@/components/resumes/Skills";
 
 export default function NewResume() {
-  const { data: session, status } = useSession();
+  const { data: session } = useSession();
   const router = useRouter();
 
+  const [skills, setSkills] = useState<ResumeSkill[]>([]);
+  const [projects, setProjects] = useState<ResumeProject[]>([]);
+  const [education, setEducation] = useState<ResumeEducation[]>([]);
+  const [experience, setExperience] = useState<ResumeExperience>([]);
   const [resumeData, setResumeData] = useState<ResumeData>({
-    personalInfo: {
-      fullName: "",
-      email: "",
-      phone: "",
-      location: "",
-      linkedin: "",
-      website: "",
-    },
+    full_name: session?.user?.name || "",
+    contact_email: session?.user?.email || "",
+    phone: "",
+    location: "",
+    linkedin_url: "",
+    website_url: "",
     summary: "",
-    experience: [],
-    education: [],
-    skills: [],
-    projects: [],
   });
 
   const [activeSection, setActiveSection] = useState("personal");
 
-  //   if (status === "loading") {
-  //     return (
-  //       <div className="min-h-screen flex items-center justify-center">
-  //         <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600"></div>
-  //       </div>
-  //     );
-  //   }
-
-  //   if (!session) {
-  //     router.push("/auth");
-  //     return null;
-  //   }
-
   const updatePersonalInfo = (field: string, value: string) => {
-    setResumeData((prev) => ({
-      ...prev,
-      personalInfo: {
-        ...prev.personalInfo,
-        [field]: value,
-      },
-    }));
-  };
-
-  const addExperience = () => {
-    const newExp = {
-      id: Date.now().toString(),
-      company: "",
-      position: "",
-      startDate: "",
-      endDate: "",
-      description: "",
-    };
-    setResumeData((prev) => ({
-      ...prev,
-      experience: [...prev.experience, newExp],
-    }));
-  };
-
-  const updateExperience = (id: string, field: string, value: string) => {
-    setResumeData((prev) => ({
-      ...prev,
-      experience: prev.experience.map((exp) =>
-        exp.id === id ? { ...exp, [field]: value } : exp
-      ),
-    }));
-  };
-
-  const removeExperience = (id: string) => {
-    setResumeData((prev) => ({
-      ...prev,
-      experience: prev.experience.filter((exp) => exp.id !== id),
-    }));
-  };
-
-  const addEducation = () => {
-    const newEdu = {
-      id: Date.now().toString(),
-      institution: "",
-      degree: "",
-      field: "",
-      graduationDate: "",
-    };
-    setResumeData((prev) => ({
-      ...prev,
-      education: [...prev.education, newEdu],
-    }));
-  };
-
-  const updateEducation = (id: string, field: string, value: string) => {
-    setResumeData((prev) => ({
-      ...prev,
-      education: prev.education.map((edu) =>
-        edu.id === id ? { ...edu, [field]: value } : edu
-      ),
-    }));
-  };
-
-  const removeEducation = (id: string) => {
-    setResumeData((prev) => ({
-      ...prev,
-      education: prev.education.filter((edu) => edu.id !== id),
-    }));
-  };
-
-  const addSkill = () => {
-    setResumeData((prev) => ({
-      ...prev,
-      skills: [...prev.skills, ""],
-    }));
-  };
-
-  const updateSkill = (index: number, value: string) => {
-    setResumeData((prev) => ({
-      ...prev,
-      skills: prev.skills.map((skill, i) => (i === index ? value : skill)),
-    }));
-  };
-
-  const removeSkill = (index: number) => {
-    setResumeData((prev) => ({
-      ...prev,
-      skills: prev.skills.filter((_, i) => i !== index),
-    }));
-  };
-
-  const addProject = () => {
-    const newProj = {
-      id: Date.now().toString(),
-      name: "",
-      description: "",
-      technologies: "",
-      link: "",
-    };
-    setResumeData((prev) => ({
-      ...prev,
-      projects: [...prev.projects, newProj],
-    }));
-  };
-
-  const updateProject = (id: string, field: string, value: string) => {
-    setResumeData((prev) => ({
-      ...prev,
-      projects: prev.projects.map((proj) =>
-        proj.id === id ? { ...proj, [field]: value } : proj
-      ),
-    }));
-  };
-
-  const removeProject = (id: string) => {
-    setResumeData((prev) => ({
-      ...prev,
-      projects: prev.projects.filter((proj) => proj.id !== id),
-    }));
+    setResumeData((prev) => ({ ...prev, [field]: value }));
   };
 
   const handleSave = () => {
-    // TODO: Save to database or local storage
-    console.log("Saving resume:", resumeData);
-    alert("Resume saved successfully!");
-  };
+    const newEdu = education.map((edu) => {
+      const { id, ...rest } = edu;
+      return { ...rest };
+    });
+    const newExp = experience.map((exp) => {
+      const { id, ...rest } = exp;
+      return { ...rest };
+    });
+    const newPro = projects.map((pro) => {
+      const { id, ...rest } = pro;
+      return { ...rest };
+    });
+    const newSkills = skills.map((skill) => {
+      const { id, ...rest } = skill;
+      return { ...rest };
+    });
 
-  const handleExport = () => {
-    // TODO: Implement PDF export
-    alert("Export functionality coming soon!");
-  };
-
-  const handleShare = () => {
-    // TODO: Implement share functionality
-    alert("Share functionality coming soon!");
+    postAPIRequest("/resumes/create", {
+      ...resumeData,
+      title: resumeData.full_name + " - Resume",
+      education: newEdu,
+      experience: newExp,
+      projects: newPro,
+      skills: newSkills,
+    })
+      .then(() => {
+        showSuccessToast("Resume created successfully!");
+        router.push(`/`);
+      })
+      .catch((err) => {
+        console.log(err.response);
+        showErrorToast("Error creating resume");
+      });
   };
 
   return (
     <AppLayout>
       <div className="">
+        <Header title="Create New Resume" />
+
         <header className="shadow">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="flex justify-between items-center py-4">
-              <div className="flex items-center space-x-4">
-                <button
-                  onClick={() => router.push("/")}
-                  className="text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white"
-                >
-                  ← Back to Dashboard
-                </button>
-                <h1 className="text-xl font-semibold text-gray-900 dark:text-white">
-                  Create New Resume
-                </h1>
-              </div>
+            <div className="flex justify-end items-center py-4">
               <div className="flex space-x-2">
                 <button
                   onClick={handleSave}
                   className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium"
                 >
                   Save
-                </button>
-                <button
-                  onClick={handleExport}
-                  className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-md text-sm font-medium"
-                >
-                  Export PDF
-                </button>
-                <button
-                  onClick={handleShare}
-                  className="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-md text-sm font-medium"
-                >
-                  Share
                 </button>
               </div>
             </div>
@@ -260,8 +105,8 @@ export default function NewResume() {
           <div className="flex space-x-8">
             {/* Form Section */}
             <div className="w-1/2 bg-white dark:bg-gray-800 shadow rounded-lg p-6">
-              <div className="mb-6">
-                <nav className="flex space-x-4">
+              <div className="mb-6 overflow-x-auto hide-scrollbar">
+                <nav className="flex space-x-4 text-nowrap">
                   {[
                     { id: "personal", label: "Personal Info" },
                     { id: "summary", label: "Summary" },
@@ -287,91 +132,10 @@ export default function NewResume() {
 
               {/* Personal Info Section */}
               {activeSection === "personal" && (
-                <div className="space-y-4">
-                  <h3 className="text-lg font-medium text-gray-900 dark:text-white">
-                    Personal Information
-                  </h3>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <Input
-                        type="text"
-                        value={resumeData.personalInfo.fullName}
-                        onChange={(e) =>
-                          updatePersonalInfo("fullName", e.target.value)
-                        }
-                        label="Full Name"
-                        name="fullName"
-                      />
-                    </div>
-                    <div>
-                      <Input
-                        label="Email"
-                        type="email"
-                        value={resumeData.personalInfo.email}
-                        onChange={(e) =>
-                          updatePersonalInfo("email", e.target.value)
-                        }
-                        name="email"
-                      />
-                    </div>
-                    <div>
-                      <Input
-                        label="Phone"
-                        type="tel"
-                        value={resumeData.personalInfo.phone}
-                        onChange={(e) =>
-                          updatePersonalInfo("phone", e.target.value)
-                        }
-                        name="phone"
-                      />
-                    </div>
-                    <div>
-                      <Input
-                        label="Location"
-                        value={resumeData.personalInfo.location}
-                        onChange={(e) =>
-                          updatePersonalInfo("location", e.target.value)
-                        }
-                        name="location"
-                      />
-                    </div>
-                    <div>
-                      <Input
-                        label="LinkedIn"
-                        type="url"
-                        value={resumeData.personalInfo.linkedin}
-                        onChange={(e) =>
-                          updatePersonalInfo("linkedin", e.target.value)
-                        }
-                        name="linkedin"
-                      />
-                    </div>
-                    <div>
-                      <Input
-                        label="Website"
-                        type="url"
-                        value={resumeData.personalInfo.website}
-                        onChange={(e) =>
-                          updatePersonalInfo("website", e.target.value)
-                        }
-                        name="website"
-                      />
-                    </div>
-                    {/* <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                      Website
-                    </label>
-                    <input
-                      type="url"
-                      value={resumeData.personalInfo.website}
-                      onChange={(e) =>
-                        updatePersonalInfo("website", e.target.value)
-                      }
-                      className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-                    />
-                  </div> */}
-                  </div>
-                </div>
+                <PersonalInfo
+                  resumeData={resumeData}
+                  updatePersonalInfo={updatePersonalInfo}
+                />
               )}
 
               {/* Summary Section */}
@@ -396,315 +160,25 @@ export default function NewResume() {
 
               {/* Experience Section */}
               {activeSection === "experience" && (
-                <div className="space-y-4">
-                  <div className="flex justify-between items-center">
-                    <h3 className="text-lg font-medium text-gray-900 dark:text-white">
-                      Work Experience
-                    </h3>
-                    <button
-                      onClick={addExperience}
-                      className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded-md text-sm"
-                    >
-                      Add Experience
-                    </button>
-                  </div>
-                  {resumeData.experience.map((exp, index) => (
-                    <div
-                      key={exp.id}
-                      className="border border-gray-200 dark:border-gray-600 rounded-md p-4"
-                    >
-                      <div className="flex justify-between items-start mb-4">
-                        <h4 className="text-md font-medium">
-                          Experience {index + 1}
-                        </h4>
-                        <button
-                          onClick={() => removeExperience(exp.id)}
-                          className="text-red-600 hover:text-red-800"
-                        >
-                          Remove
-                        </button>
-                      </div>
-                      <div className="grid grid-cols-2 gap-4">
-                        <div>
-                          <Input
-                            type="text"
-                            value={exp.company}
-                            label="Company"
-                            onChange={(e) =>
-                              updateExperience(
-                                exp.id,
-                                "company",
-                                e.target.value
-                              )
-                            }
-                            name="company"
-                          />
-                        </div>
-                        <div>
-                          <Input
-                            label="Position"
-                            type="text"
-                            value={exp.position}
-                            onChange={(e) =>
-                              updateExperience(
-                                exp.id,
-                                "position",
-                                e.target.value
-                              )
-                            }
-                          />
-                        </div>
-                        <div>
-                          <Input
-                            label="Start Date"
-                            type="month"
-                            value={exp.startDate}
-                            onChange={(e) =>
-                              updateExperience(
-                                exp.id,
-                                "startDate",
-                                e.target.value
-                              )
-                            }
-                          />
-                        </div>
-                        <div>
-                          <Input
-                            label="End Date"
-                            type="month"
-                            value={exp.endDate}
-                            onChange={(e) =>
-                              updateExperience(
-                                exp.id,
-                                "endDate",
-                                e.target.value
-                              )
-                            }
-                          />
-                        </div>
-                      </div>
-                      <div className="mt-4">
-                        <Textarea
-                          label="Description"
-                          value={exp.description}
-                          onChange={(e) =>
-                            updateExperience(
-                              exp.id,
-                              "description",
-                              e.target.value
-                            )
-                          }
-                          rows={3}
-                        />
-                      </div>
-                    </div>
-                  ))}
-                </div>
+                <Experiences
+                  experience={experience}
+                  setExperience={setExperience}
+                />
               )}
 
               {/* Education Section */}
               {activeSection === "education" && (
-                <div className="space-y-4">
-                  <div className="flex justify-between items-center">
-                    <h3 className="text-lg font-medium text-gray-900 dark:text-white">
-                      Education
-                    </h3>
-                    <button
-                      onClick={addEducation}
-                      className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded-md text-sm"
-                    >
-                      Add Education
-                    </button>
-                  </div>
-                  {resumeData.education.map((edu, index) => (
-                    <div
-                      key={edu.id}
-                      className="border border-gray-200 dark:border-gray-600 rounded-md p-4"
-                    >
-                      <div className="flex justify-between items-start mb-4">
-                        <h4 className="text-md font-medium">
-                          Education {index + 1}
-                        </h4>
-                        <button
-                          onClick={() => removeEducation(edu.id)}
-                          className="text-red-600 hover:text-red-800"
-                        >
-                          Remove
-                        </button>
-                      </div>
-                      <div className="grid grid-cols-2 gap-4">
-                        <div>
-                          <Input
-                            type="text"
-                            value={edu.institution}
-                            onChange={(e) =>
-                              updateEducation(
-                                edu.id,
-                                "institution",
-                                e.target.value
-                              )
-                            }
-                            label="Institution"
-                          />
-                        </div>
-                        <div>
-                          <Input
-                            type="text"
-                            value={edu.degree}
-                            onChange={(e) =>
-                              updateEducation(edu.id, "degree", e.target.value)
-                            }
-                            label="Degree"
-                          />
-                        </div>
-                        <div>
-                          <Input
-                            type="text"
-                            value={edu.field}
-                            onChange={(e) =>
-                              updateEducation(edu.id, "field", e.target.value)
-                            }
-                            label="Field of Study"
-                          />
-                        </div>
-                        <div>
-                          <Input
-                            type="month"
-                            value={edu.graduationDate}
-                            onChange={(e) =>
-                              updateEducation(
-                                edu.id,
-                                "graduationDate",
-                                e.target.value
-                              )
-                            }
-                            label="Graduation Date"
-                          />
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
+                <Education education={education} setEducation={setEducation} />
               )}
 
               {/* Skills Section */}
               {activeSection === "skills" && (
-                <div className="space-y-4">
-                  <div className="flex justify-between items-center">
-                    <h3 className="text-lg font-medium text-gray-900 dark:text-white">
-                      Skills
-                    </h3>
-                    <button
-                      onClick={addSkill}
-                      className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded-md text-sm cursor-pointer"
-                    >
-                      Add Skill
-                    </button>
-                  </div>
-                  {resumeData.skills.map((skill, index) => (
-                    <div key={index} className="flex items-center space-x-2">
-                      <Input
-                        type="text"
-                        value={skill}
-                        onChange={(e) => updateSkill(index, e.target.value)}
-                        placeholder="Enter a skill"
-                      />
-                      <button
-                        onClick={() => removeSkill(index)}
-                        className="text-red-600 hover:text-red-800 cursor-pointer"
-                      >
-                        Remove
-                      </button>
-                    </div>
-                  ))}
-                </div>
+                <Skills skills={skills} setSkills={setSkills} />
               )}
 
               {/* Projects Section */}
               {activeSection === "projects" && (
-                <div className="space-y-4">
-                  <div className="flex justify-between items-center">
-                    <h3 className="text-lg font-medium text-gray-900 dark:text-white">
-                      Projects
-                    </h3>
-                    <button
-                      onClick={addProject}
-                      className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded-md text-sm"
-                    >
-                      Add Project
-                    </button>
-                  </div>
-                  {resumeData.projects.map((proj, index) => (
-                    <div
-                      key={proj.id}
-                      className="border border-gray-200 dark:border-gray-600 rounded-md p-4"
-                    >
-                      <div className="flex justify-between items-start mb-4">
-                        <h4 className="text-md font-medium">
-                          Project {index + 1}
-                        </h4>
-                        <button
-                          onClick={() => removeProject(proj.id)}
-                          className="text-red-600 hover:text-red-800"
-                        >
-                          Remove
-                        </button>
-                      </div>
-                      <div className="space-y-4">
-                        <div>
-                          <Input
-                            type="text"
-                            value={proj.name}
-                            onChange={(e) =>
-                              updateProject(proj.id, "name", e.target.value)
-                            }
-                            label="Project Name"
-                          />
-                        </div>
-                        <div>
-                          <Textarea
-                            label="Description"
-                            value={proj.description}
-                            onChange={(e) =>
-                              updateProject(
-                                proj.id,
-                                "description",
-                                e.target.value
-                              )
-                            }
-                            rows={3}
-                          />
-                        </div>
-                        <div>
-                          <Input
-                            type="text"
-                            value={proj.technologies}
-                            onChange={(e) =>
-                              updateProject(
-                                proj.id,
-                                "technologies",
-                                e.target.value
-                              )
-                            }
-                            placeholder="e.g., React, Node.js, MongoDB"
-                            label="Technologies used"
-                          />
-                        </div>
-                        <div>
-                          <Input
-                            type="url"
-                            value={proj.link}
-                            onChange={(e) =>
-                              updateProject(proj.id, "link", e.target.value)
-                            }
-                            placeholder="https://yourprojectlink.com"
-                            label="Project Link"
-                          />
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
+                <Projects projects={projects} setProjects={setProjects} />
               )}
             </div>
 
@@ -719,25 +193,25 @@ export default function NewResume() {
                   {/* Header */}
                   <div className="text-center mb-6">
                     <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
-                      {resumeData.personalInfo.fullName || "Your Name"}
+                      {resumeData.full_name || "Your Name"}
                     </h1>
                     <div className="text-sm text-gray-600 dark:text-gray-400 mt-2">
-                      {resumeData.personalInfo.email && (
-                        <span>{resumeData.personalInfo.email} • </span>
+                      {resumeData.contact_email && (
+                        <span>{resumeData.contact_email} • </span>
                       )}
-                      {resumeData.personalInfo.phone && (
-                        <span>{resumeData.personalInfo.phone} • </span>
-                      )}
-                      {resumeData.personalInfo.location && (
-                        <span>{resumeData.personalInfo.location}</span>
+                      {resumeData.phone && <span>{resumeData.phone} • </span>}
+                      {resumeData.location && (
+                        <span>{resumeData.location}</span>
                       )}
                     </div>
-                    <div className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-                      {resumeData.personalInfo.linkedin && (
-                        <span>{resumeData.personalInfo.linkedin} • </span>
+                    <div className="text-sm text-gray-600 dark:text-gray-400 mt-1 text-wrap word-wrap">
+                      {resumeData.linkedin_url && (
+                        <span className="text-wrap word-wrap">
+                          {resumeData.linkedin_url} •{" "}
+                        </span>
                       )}
-                      {resumeData.personalInfo.website && (
-                        <span>{resumeData.personalInfo.website}</span>
+                      {resumeData.website_url && (
+                        <span>{resumeData.website_url}</span>
                       )}
                     </div>
                   </div>
@@ -755,13 +229,13 @@ export default function NewResume() {
                   )}
 
                   {/* Experience */}
-                  {resumeData.experience.length > 0 && (
+                  {experience.length > 0 && (
                     <div className="mb-6">
                       <h2 className="text-lg font-semibold text-gray-900 dark:text-white border-b border-gray-300 dark:border-gray-600 pb-1 mb-2">
                         Experience
                       </h2>
-                      {resumeData.experience.map((exp) => (
-                        <div key={exp.id} className="mb-4">
+                      {experience.map((exp, index) => (
+                        <div key={`exp-${index}`} className="mb-4">
                           <div className="flex justify-between items-start">
                             <div>
                               <h3 className="font-semibold text-gray-900 dark:text-white">
@@ -772,7 +246,7 @@ export default function NewResume() {
                               </p>
                             </div>
                             <span className="text-sm text-gray-500 dark:text-gray-500">
-                              {exp.startDate} - {exp.endDate || "Present"}
+                              {exp.start_date} - {exp.end_date || "Present"}
                             </span>
                           </div>
                           <p className="text-sm text-gray-700 dark:text-gray-300 mt-1">
@@ -784,24 +258,24 @@ export default function NewResume() {
                   )}
 
                   {/* Education */}
-                  {resumeData.education.length > 0 && (
+                  {education.length > 0 && (
                     <div className="mb-6">
                       <h2 className="text-lg font-semibold text-gray-900 dark:text-white border-b border-gray-300 dark:border-gray-600 pb-1 mb-2">
                         Education
                       </h2>
-                      {resumeData.education.map((edu) => (
-                        <div key={edu.id} className="mb-2">
+                      {education.map((edu, index) => (
+                        <div key={`edu-${index}`} className="mb-2">
                           <div className="flex justify-between items-start">
                             <div>
                               <h3 className="font-semibold text-gray-900 dark:text-white">
-                                {edu.degree} in {edu.field}
+                                {edu.degree} in {edu.field_of_study}
                               </h3>
                               <p className="text-sm text-gray-600 dark:text-gray-400">
-                                {edu.institution}
+                                {edu.school}
                               </p>
                             </div>
                             <span className="text-sm text-gray-500 dark:text-gray-500">
-                              {edu.graduationDate}
+                              {edu.graduation_date}
                             </span>
                           </div>
                         </div>
@@ -810,21 +284,23 @@ export default function NewResume() {
                   )}
 
                   {/* Skills */}
-                  {resumeData.skills.length > 0 && (
+                  {skills.length > 0 && (
                     <div className="mb-6">
                       <h2 className="text-lg font-semibold text-gray-900 dark:text-white border-b border-gray-300 dark:border-gray-600 pb-1 mb-2">
                         Skills
                       </h2>
                       <div className="flex flex-wrap gap-2">
-                        {resumeData.skills.map(
+                        {skills.map(
                           (skill, index) =>
                             skill && (
-                              <span
-                                key={index}
-                                className="bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 px-2 py-1 rounded text-xs"
-                              >
-                                {skill}
-                              </span>
+                              <div>
+                                <span
+                                  key={`skills-${index}`}
+                                  className="bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 px-2 py-1 rounded text-xs"
+                                >
+                                  {skill.name}
+                                </span>
+                              </div>
                             )
                         )}
                       </div>
@@ -832,16 +308,16 @@ export default function NewResume() {
                   )}
 
                   {/* Projects */}
-                  {resumeData.projects.length > 0 && (
+                  {projects.length > 0 && (
                     <div className="mb-6">
                       <h2 className="text-lg font-semibold text-gray-900 dark:text-white border-b border-gray-300 dark:border-gray-600 pb-1 mb-2">
                         Projects
                       </h2>
-                      {resumeData.projects.map((proj) => (
-                        <div key={proj.id} className="mb-4">
+                      {projects.map((proj, index) => (
+                        <div key={`projects-${index}`} className="mb-4">
                           <div className="flex justify-between items-start">
                             <h3 className="font-semibold text-gray-900 dark:text-white">
-                              {proj.name}
+                              {proj.title}
                             </h3>
                             {proj.link && (
                               <a
@@ -874,4 +350,19 @@ export default function NewResume() {
       </div>
     </AppLayout>
   );
+}
+
+{
+  /* <button
+                  onClick={handleExport}
+                  className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-md text-sm font-medium"
+                >
+                  Export PDF
+                </button>
+                <button
+                  onClick={handleShare}
+                  className="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-md text-sm font-medium"
+                >
+                  Share
+                </button> */
 }

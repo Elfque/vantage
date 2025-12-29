@@ -1,6 +1,6 @@
-import React from "react";
+import React, { InputHTMLAttributes } from "react";
 
-interface InputProps {
+interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
   label?: string;
   placeholder?: string;
   type?: string;
@@ -9,6 +9,9 @@ interface InputProps {
   error?: string;
   className?: string;
   name?: string;
+  required?: boolean;
+  onFocus?: () => void;
+  onBlur?: () => void;
 }
 
 const Input: React.FC<InputProps> = ({
@@ -20,6 +23,9 @@ const Input: React.FC<InputProps> = ({
   error,
   className = "",
   name,
+  required,
+  onBlur,
+  onFocus,
 }) => {
   return (
     <div className={`mb-4 ${className}`}>
@@ -40,6 +46,9 @@ const Input: React.FC<InputProps> = ({
           error ? "border-red-500 focus:ring-red-500 focus:border-red-500" : ""
         }`}
         name={name}
+        required={required}
+        onBlur={onBlur}
+        onFocus={onFocus}
       />
       {error && (
         <p className="mt-1 text-sm text-red-600 dark:text-red-400">{error}</p>

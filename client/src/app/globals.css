@@ -25,3 +25,12 @@ body {
   font-family: "Lexend Deca", sans-serif;
   @apply bg-slate-950;
 }
+
+.hide-scrollbar {
+  &::-webkit-scrollbar {
+    display: none;
+  }
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+  /* overflow-y: scroll; */
+}

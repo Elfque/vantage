@@ -1,14 +1,23 @@
 "use client";
 
-import { useState } from "react";
+import { ChangeEvent, useState } from "react";
 import { signIn } from "next-auth/react";
 import Input from "@/components/Input";
+import { postAPIRequest } from "@/utils/requests";
 import { showErrorToast } from "@/utils/ToasterProps";
 
 const LoginPage = () => {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const [payload, setPayload] = useState({
+    email: "",
+    password: "",
+    full_name: "",
+  });
   const [isLoading, setIsLoading] = useState(false);
+
+  const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setPayload({ ...payload, [name]: value });
+  };
 
   const handleGoogleSignIn = async () => {
     try {
@@ -22,21 +31,20 @@ const LoginPage = () => {
     e.preventDefault();
     setIsLoading(true);
 
-    const result = await signIn("credentials", {
-      email,
-      password,
-      redirect: false,
-    });
-
-    if (result?.ok) {
-      window.location.replace("/");
-    } else {
-      showErrorToast(
-        "Login failed. Please check your credentials and try again."
-      );
-    }
-
-    setIsLoading(false);
+    postAPIRequest("/auth/register", payload)
+      .then(() => {
+        window.location.replace("/auth");
+        setIsLoading(false);
+      })
+      .catch((error) => {
+        showErrorToast(
+          error.response?.data?.message ??
+            error.response?.data?.errors[0]?.msg ??
+            "Signup failed. Please try again."
+        );
+        // console.log(error.response?.data?.errors[0].msg);
+        setIsLoading(false);
+      });
   };
 
   return (
@@ -47,7 +55,7 @@ const LoginPage = () => {
             Welcome to Vantage
           </h1>
           <p className="text-muted-foreground">
-            Sign in to create and manage your resumes
+            Sign up to create and manage your resumes
           </p>
         </div>
 
@@ -95,19 +103,32 @@ const LoginPage = () => {
               label="Email"
               placeholder="Enter your email"
               type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              value={payload.email}
+              onChange={handleChange}
+              name="email"
               required
             />
           </div>
 
           <div>
             <Input
+              label="Full Name"
+              placeholder="Enter your full name"
+              type="text"
+              value={payload.full_name}
+              onChange={handleChange}
+              name="full_name"
+              required
+            />
+          </div>
+          <div>
+            <Input
               label="Password"
               placeholder="Enter your password"
               type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
+              value={payload.password}
+              onChange={handleChange}
+              name="password"
               required
             />
           </div>

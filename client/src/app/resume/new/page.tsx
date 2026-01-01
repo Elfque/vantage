@@ -20,6 +20,7 @@ import Header from "@/components/layout/Header";
 import { postAPIRequest } from "@/utils/requests";
 import { showErrorToast, showSuccessToast } from "@/utils/ToasterProps";
 import Skills from "@/components/resumes/Skills";
+import AttachmentSelector from "@/components/AttachmentSelector";
 
 export default function NewResume() {
   const { data: session } = useSession();
@@ -29,6 +30,7 @@ export default function NewResume() {
   const [projects, setProjects] = useState<ResumeProject[]>([]);
   const [education, setEducation] = useState<ResumeEducation[]>([]);
   const [experience, setExperience] = useState<ResumeExperience>([]);
+  const [portfolioId, setPortfolioId] = useState<string | null>(null);
   const [resumeData, setResumeData] = useState<ResumeData>({
     full_name: session?.user?.name || "",
     contact_email: session?.user?.email || "",
@@ -69,13 +71,14 @@ export default function NewResume() {
       experience: newExp,
       projects: newPro,
       skills: newSkills,
+      portfolio_id: portfolioId,
     })
-      .then(() => {
+      .then(({ resumeId }) => {
         showSuccessToast("Resume created successfully!");
-        router.push(`/`);
+        router.push(`/resume/${resumeId}`);
       })
       .catch((err) => {
-        console.log(err.response);
+        // console.log(err.response);
         showErrorToast("Error creating resume");
       });
   };
@@ -129,12 +132,20 @@ export default function NewResume() {
                 </nav>
               </div>
 
-              {/* Personal Info Section */}
+              {/* Personal Info Section  and Attchment Section*/}
               {activeSection === "personal" && (
-                <PersonalInfo
-                  resumeData={resumeData}
-                  updatePersonalInfo={updatePersonalInfo}
-                />
+                <>
+                  <PersonalInfo
+                    resumeData={resumeData}
+                    updatePersonalInfo={updatePersonalInfo}
+                  />
+                  <AttachmentSelector
+                    type="portfolio"
+                    selectedId={portfolioId}
+                    onSelectionChange={setPortfolioId}
+                    label="Attach Portfolio to Resume"
+                  />
+                </>
               )}
 
               {/* Summary Section */}
@@ -179,6 +190,16 @@ export default function NewResume() {
               {activeSection === "projects" && (
                 <Projects projects={projects} setProjects={setProjects} />
               )}
+
+              {/* Attachments Section */}
+              {/* {activeSection === "attachments" && (
+                <AttachmentSelector
+                  type="portfolio"
+                  selectedId={portfolioId}
+                  onSelectionChange={setPortfolioId}
+                  label="Attach Portfolio to Resume"
+                />
+              )} */}
             </div>
 
             {/* Live Preview Section */}

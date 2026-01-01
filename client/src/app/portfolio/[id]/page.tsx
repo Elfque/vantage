@@ -138,6 +138,14 @@ export default function ViewPortfolio() {
           <div className="flex gap-2 justify-end">
             <button
               onClick={() =>
+                navigate.push(`/portfolio/view/${portfolioData.id}`)
+              }
+              className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-md flex items-center gap-2"
+            >
+              Preview
+            </button>
+            <button
+              onClick={() =>
                 navigate.push(`/portfolio/${portfolioData.id}/edit`)
               }
               className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-md flex items-center gap-2"

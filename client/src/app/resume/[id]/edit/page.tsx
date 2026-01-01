@@ -20,6 +20,7 @@ import Header from "@/components/layout/Header";
 import { getAPIRequest, putAPIRequest } from "@/utils/requests";
 import { showErrorToast, showSuccessToast } from "@/utils/ToasterProps";
 import Skills from "@/components/resumes/Skills";
+import AttachmentSelector from "@/components/AttachmentSelector";
 
 export default function EditResume() {
   const { data: session } = useSession();
@@ -31,6 +32,7 @@ export default function EditResume() {
   const [projects, setProjects] = useState<ResumeProject[]>([]);
   const [education, setEducation] = useState<ResumeEducation[]>([]);
   const [experience, setExperience] = useState<ResumeExperience>([]);
+  const [portfolioId, setPortfolioId] = useState<string | null>(null);
   const [resumeData, setResumeData] = useState<ResumeData>({
     full_name: session?.user?.name || "",
     contact_email: session?.user?.email || "",
@@ -60,6 +62,7 @@ export default function EditResume() {
       setProjects(resume.projects || []);
       setEducation(resume.education || []);
       setExperience(resume.experience || []);
+      setPortfolioId(resume.portfolio_ids?.[0] || null);
     } catch (error) {
       showErrorToast("Failed to load resume");
     } finally {
@@ -100,6 +103,7 @@ export default function EditResume() {
       experience: newExp,
       projects: newPro,
       skills: newSkills,
+      portfolio_ids: portfolioId ? [portfolioId] : [],
     })
       .then(() => {
         showSuccessToast("Resume updated successfully!");
@@ -172,6 +176,7 @@ export default function EditResume() {
                   { id: "education", label: "Education" },
                   { id: "skills", label: "Skills" },
                   { id: "projects", label: "Projects" },
+                  { id: "attachments", label: "Attachments" },
                 ].map((section) => (
                   <button
                     key={section.id}
@@ -233,6 +238,15 @@ export default function EditResume() {
 
               {activeSection === "projects" && (
                 <Projects projects={projects} setProjects={setProjects} />
+              )}
+
+              {activeSection === "attachments" && (
+                <AttachmentSelector
+                  type="portfolio"
+                  selectedId={portfolioId}
+                  onSelectionChange={setPortfolioId}
+                  label="Attach Portfolio to Resume"
+                />
               )}
             </div>
           </div>

@@ -89,4 +89,5 @@ export interface ResumeDataResponse {
     technologies: string;
     link: string;
   }>;
+  portfolio_ids?: string[];
 }

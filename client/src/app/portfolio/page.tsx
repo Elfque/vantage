@@ -31,7 +31,7 @@ export default function PortfoliosPage() {
   }, []);
 
   const fetchPortfolios = async () => {
-    getAPIRequest("/portfolio/all")
+    getAPIRequest("/portfolio")
       .then(({ data }) => {
         setPortfolios(data);
         setLoading(false);

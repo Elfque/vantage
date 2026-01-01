@@ -56,7 +56,6 @@ const SortableExperienceItem = memo(
         style={style}
         {...attributes}
         ref={setNodeRef}
-        key={`experience-${experience.id}`}
         className="border border-gray-200 dark:border-gray-600 rounded-md p-4"
       >
         <div className="flex justify-between items-start mb-4">

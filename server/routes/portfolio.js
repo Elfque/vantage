@@ -10,7 +10,7 @@ const {
 } = require("../utils/portfolio");
 
 router.post("/create", protect, createPortfolio);
-router.get("/all", protect, getAllPortfolios);
+router.get("/", protect, getAllPortfolios);
 router.get("/:id", protect, getSinglePortfolio);
 router.put("/:id", protect, updatePortfolio);
 router.delete("/:id", protect, deletePortfolio);

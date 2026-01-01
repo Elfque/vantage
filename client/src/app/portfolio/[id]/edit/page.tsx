@@ -19,6 +19,7 @@ import {
   deleteAPIRequest,
 } from "@/utils/requests";
 import { showErrorToast, showSuccessToast } from "@/utils/ToasterProps";
+import AttachmentSelector from "@/components/AttachmentSelector";
 
 export default function EditPortfolioPage() {
   const params = useParams();
@@ -33,6 +34,7 @@ export default function EditPortfolioPage() {
 
   const [projects, setProjects] = useState<PortfolioProject[]>([]);
   const [skills, setSkills] = useState<PortfolioSkill[]>([]);
+  const [resumeId, setResumeId] = useState<string | null>(null);
   const [portfolioData, setPortfolioData] = useState<PortfolioPersonalData>({
     full_name: session?.user?.name || "",
     contact_email: session?.user?.email || "",
@@ -66,6 +68,7 @@ export default function EditPortfolioPage() {
         summary: data.summary || "",
       });
       setProjects(data.projects || []);
+      setResumeId(data.resume_ids?.[0] || null);
       //   setSkills(data.skills || []);
     } catch (error) {
       console.error("Error fetching portfolio:", error);
@@ -94,6 +97,7 @@ export default function EditPortfolioPage() {
         ...portfolioData,
         projects: newProject,
         skills,
+        resume_ids: resumeId ? [resumeId] : [],
       };
       await putAPIRequest(`/portfolio/${id}`, payload);
       showSuccessToast("Portfolio updated successfully");
@@ -156,6 +160,7 @@ export default function EditPortfolioPage() {
     { id: "experience", label: "Experience" },
     { id: "projects", label: "Projects" },
     { id: "skills", label: "Skills" },
+    { id: "attachments", label: "Attachments" },
   ];
 
   return (
@@ -215,6 +220,15 @@ export default function EditPortfolioPage() {
 
             <section id="skills">
               <PortfolioSkills skills={skills} setSkills={setSkills} />
+            </section>
+
+            <section id="attachments">
+              <AttachmentSelector
+                type="resumes"
+                selectedId={resumeId}
+                onSelectionChange={setResumeId}
+                label="Attach Resume to Portfolio"
+              />
             </section>
           </div>
         </div>

@@ -15,6 +15,7 @@ const createResume = async (req, res) => {
     education,
     skills,
     projects,
+    portfolio_id,
   } = req.body;
   const userId = req.user.userId;
 
@@ -29,7 +30,7 @@ const createResume = async (req, res) => {
   try {
     const newId = uuid.v4();
     const [resumeResult] = await connect.execute(
-      "INSERT INTO resumes (user_id, title, summary,id, full_name, contact_email, phone, location, linkedin_url, website_url) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+      "INSERT INTO resumes (user_id, title, summary,id, full_name, contact_email, phone, location, linkedin_url, website_url,portfolio_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?,?)",
       [
         userId,
         title,
@@ -41,6 +42,7 @@ const createResume = async (req, res) => {
         location,
         linkedin_url,
         website_url,
+        portfolio_id,
       ]
     );
     const resumeId = newId;
@@ -48,8 +50,15 @@ const createResume = async (req, res) => {
     if (experience && experience.length > 0) {
       const expQueries = experience.map((exp) => {
         return connect.execute(
-          "INSERT INTO experience (resume_id, company, position, description) VALUES (?, ?, ?, ?)",
-          [resumeId, exp.company, exp.position, exp.description]
+          "INSERT INTO experience (resume_id, company, position, description, start_date, end_date) VALUES (?, ?, ?, ?,?,?)",
+          [
+            resumeId,
+            exp.company,
+            exp.position,
+            exp.description,
+            exp.start_date,
+            exp.end_date,
+          ]
         );
       });
       await Promise.all(expQueries);
@@ -58,13 +67,14 @@ const createResume = async (req, res) => {
     if (education && Array.isArray(education) && education.length > 0) {
       const eduQueries = education.map((edu) => {
         return connect.execute(
-          "INSERT INTO education (resume_id, school, degree, field_of_study, graduation_date) VALUES (?, ?, ?, ?, ?)",
+          "INSERT INTO education (resume_id, school, degree, field_of_study, graduation_date, start_date) VALUES (?, ?, ?, ?, ?,?)",
           [
             resumeId,
             edu.school,
             edu.degree,
             edu.field_of_study,
             edu.graduation_date || null,
+            edu.start_date || null,
           ]
         );
       });
@@ -176,11 +186,12 @@ const updateResume = async (req, res) => {
     experience,
     skills,
     projects,
+    portfolio_id,
   } = req.body;
 
   try {
     const [updateHeader] = await connect.execute(
-      "UPDATE resumes SET title = ?, summary = ?, full_name = ?, contact_email = ?, phone = ?, location = ?, linkedin_url = ?, website_url = ? WHERE id = ? AND user_id = ?",
+      "UPDATE resumes SET title = ?, summary = ?, full_name = ?, contact_email = ?, phone = ?, location = ?, linkedin_url = ?, website_url = ?, portfolio_id=? WHERE id = ? AND user_id = ?",
       [
         title,
         summary,
@@ -190,6 +201,7 @@ const updateResume = async (req, res) => {
         location,
         linkedin_url,
         website_url,
+        portfolio_id,
         id,
         userId,
       ]

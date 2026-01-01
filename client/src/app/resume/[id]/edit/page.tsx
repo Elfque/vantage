@@ -61,9 +61,7 @@ export default function EditResume() {
       setEducation(resume.education || []);
       setExperience(resume.experience || []);
     } catch (error) {
-      console.error("Error fetching resume:", error);
       showErrorToast("Failed to load resume");
-      navigate.push("/resumes");
     } finally {
       setLoading(false);
     }
@@ -79,20 +77,20 @@ export default function EditResume() {
 
   const handleSave = () => {
     const newEdu = education.map((edu) => {
-      const { id, ...rest } = edu;
-      return { ...rest };
+      const { id, isNew, ...rest } = edu;
+      return isNew ? { ...rest } : { ...rest, id };
     });
     const newExp = experience.map((exp) => {
-      const { id, ...rest } = exp;
-      return { ...rest };
+      const { id, isNew, ...rest } = exp;
+      return isNew ? { ...rest } : { ...rest, id };
     });
     const newPro = projects.map((pro) => {
-      const { id, ...rest } = pro;
-      return { ...rest };
+      const { id, isNew, ...rest } = pro;
+      return isNew ? { ...rest } : { ...rest, id };
     });
     const newSkills = skills.map((skill) => {
-      const { id, ...rest } = skill;
-      return { ...rest };
+      const { id, isNew, ...rest } = skill;
+      return isNew ? { ...rest } : { ...rest, id };
     });
 
     putAPIRequest(`/resumes/${resumeId}`, {
@@ -114,12 +112,10 @@ export default function EditResume() {
   };
 
   const handleExport = () => {
-    // TODO: Implement PDF export
     alert("Export functionality coming soon!");
   };
 
   const handleShare = () => {
-    // TODO: Implement share functionality
     alert("Share functionality coming soon!");
   };
 
@@ -167,7 +163,6 @@ export default function EditResume() {
 
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
-            {/* Sidebar */}
             <div className="lg:col-span-1">
               <nav className="space-y-2">
                 {[

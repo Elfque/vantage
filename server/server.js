@@ -19,6 +19,7 @@ app.use(express.json());
 
 app.use("/api/resumes", require("./routes/resumes"));
 app.use("/api/auth", require("./routes/auth"));
+app.use("/api/portfolio", require("./routes/portfolio"));
 
 app.get("/", (req, res) => {
   res.send("Resume Builder Backend");

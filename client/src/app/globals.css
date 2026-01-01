@@ -23,7 +23,7 @@
 body {
   color: var(--foreground);
   font-family: "Lexend Deca", sans-serif;
-  @apply bg-slate-950;
+  @apply bg-[#020618];
 }
 
 .hide-scrollbar {
@@ -32,5 +32,8 @@ body {
   }
   -ms-overflow-style: none;
   scrollbar-width: none;
-  /* overflow-y: scroll; */
+}
+
+.link-text {
+  color: #155dfc;
 }

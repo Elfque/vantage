@@ -10,6 +10,7 @@ interface TextareaProps {
   className?: string;
   onFocus?: () => void;
   onBlur?: () => void;
+  name?: string;
 }
 
 const Textarea: React.FC<TextareaProps> = ({
@@ -22,6 +23,7 @@ const Textarea: React.FC<TextareaProps> = ({
   className = "",
   onFocus,
   onBlur,
+  name,
 }) => {
   return (
     <div className={`mb-4 ${className}`}>
@@ -40,6 +42,7 @@ const Textarea: React.FC<TextareaProps> = ({
         }`}
         onFocus={onFocus}
         onBlur={onBlur}
+        name={name ?? ""}
       />
       {error && (
         <p className="mt-1 text-sm text-red-600 dark:text-red-400">{error}</p>

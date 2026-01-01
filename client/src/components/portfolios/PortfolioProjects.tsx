@@ -17,17 +17,9 @@ import {
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { FaGripVertical, FaRegTrashAlt } from "react-icons/fa";
-import { ResumeProject } from "@/types/resume";
+import { PortfolioProject } from "@/types/portfolio";
 
-type ProjectItem = {
-  id: number;
-  title: string;
-  description: string;
-  technologies: string;
-  link: string;
-};
-
-const SortableProjectItem = memo(
+const SortablePortfolioProjectItem = memo(
   ({
     project,
     index,
@@ -36,12 +28,12 @@ const SortableProjectItem = memo(
     updateProject,
     removeProject,
   }: {
-    project: ProjectItem;
+    project: PortfolioProject;
     index: number;
-    editingId: number | null;
-    setEditingId: (id: number | null) => void;
-    updateProject: (id: number, field: string, value: string) => void;
-    removeProject: (id: number) => void;
+    editingId: string | null;
+    setEditingId: (id: string | null) => void;
+    updateProject: (id: string, field: string, value: string) => void;
+    removeProject: (id: string) => void;
   }) => {
     const { attributes, listeners, setNodeRef, transform, transition } =
       useSortable({
@@ -58,42 +50,45 @@ const SortableProjectItem = memo(
       <div
         ref={setNodeRef}
         style={style}
-        {...attributes}
-        className="border border-gray-200 dark:border-gray-600 rounded-md p-4"
+        className="bg-gray-50 dark:bg-gray-800 p-4 rounded-lg border border-gray-200 dark:border-gray-700"
       >
-        <div className="flex justify-between items-start mb-4">
+        <div className="flex justify-between items-start mb-3">
           <div className="flex items-center gap-2">
-            <div
+            <button
+              {...attributes}
               {...listeners}
-              className="cursor-move text-gray-400 hover:text-gray-600"
+              className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 cursor-grab active:cursor-grabbing"
             >
               <FaGripVertical />
-            </div>
-            <h4 className="text-md font-medium">Project {index + 1}</h4>
+            </button>
+            <span className="text-sm text-gray-500 dark:text-gray-400">
+              Project {index + 1}
+            </span>
           </div>
-
           <button
             onClick={() => removeProject(project.id)}
-            className="text-red-600 hover:text-red-800"
+            className="text-red-500 hover:text-red-700"
           >
             <FaRegTrashAlt />
           </button>
         </div>
 
-        <div className="space-y-4">
+        <div className="space-y-3">
           <Input
             type="text"
             label="Project Name"
-            value={project.title}
+            placeholder="e.g., E-commerce Website"
+            value={project.name}
             onFocus={() => setEditingId(project.id)}
             onBlur={() => setEditingId(null)}
-            onChange={(e) => updateProject(project.id, "title", e.target.value)}
+            onChange={(e) => updateProject(project.id, "name", e.target.value)}
           />
 
           <Textarea
             label="Description"
-            rows={3}
+            placeholder="Describe your project..."
             value={project.description}
+            rows={3}
             onFocus={() => setEditingId(project.id)}
             onBlur={() => setEditingId(null)}
             onChange={(e) =>
@@ -103,24 +98,48 @@ const SortableProjectItem = memo(
 
           <Input
             type="text"
-            label="Technologies used"
-            placeholder="e.g., React, Node.js, MongoDB"
-            value={project.technologies}
+            label="Tags"
+            placeholder="e.g., React, TypeScript, Node.js"
+            value={project.tags}
+            onFocus={() => setEditingId(project.id)}
+            onBlur={() => setEditingId(null)}
+            onChange={(e) => updateProject(project.id, "tags", e.target.value)}
+          />
+
+          <Input
+            type="url"
+            label="Live URL"
+            placeholder="https://yourproject.com"
+            value={project.live_url}
             onFocus={() => setEditingId(project.id)}
             onBlur={() => setEditingId(null)}
             onChange={(e) =>
-              updateProject(project.id, "technologies", e.target.value)
+              updateProject(project.id, "live_url", e.target.value)
             }
           />
 
           <Input
             type="url"
-            label="Project Link"
-            placeholder="https://yourprojectlink.com"
-            value={project.link}
+            label="GitHub URL"
+            placeholder="https://github.com/username/project"
+            value={project.github_url}
             onFocus={() => setEditingId(project.id)}
             onBlur={() => setEditingId(null)}
-            onChange={(e) => updateProject(project.id, "link", e.target.value)}
+            onChange={(e) =>
+              updateProject(project.id, "github_url", e.target.value)
+            }
+          />
+
+          <Input
+            type="url"
+            label="Image URL"
+            placeholder="https://example.com/project-image.jpg"
+            value={project.image_url}
+            onFocus={() => setEditingId(project.id)}
+            onBlur={() => setEditingId(null)}
+            onChange={(e) =>
+              updateProject(project.id, "image_url", e.target.value)
+            }
           />
         </div>
       </div>
@@ -128,15 +147,18 @@ const SortableProjectItem = memo(
   }
 );
 
-SortableProjectItem.displayName = "SortableProjectItem";
+SortablePortfolioProjectItem.displayName = "SortablePortfolioProjectItem";
 
-type ProjectsProps = {
-  projects: ResumeProject[];
-  setProjects: React.Dispatch<React.SetStateAction<ResumeProject[]>>;
+type PortfolioProjectsProps = {
+  projects: PortfolioProject[];
+  setProjects: React.Dispatch<React.SetStateAction<PortfolioProject[]>>;
 };
 
-const Projects = ({ projects, setProjects }: ProjectsProps) => {
-  const [editingId, setEditingId] = useState<number | null>(null);
+const PortfolioProjects = ({
+  projects,
+  setProjects,
+}: PortfolioProjectsProps) => {
+  const [editingId, setEditingId] = useState<string | null>(null);
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -148,23 +170,25 @@ const Projects = ({ projects, setProjects }: ProjectsProps) => {
     setProjects((prev) => [
       ...prev,
       {
-        id: Date.now(),
-        title: "",
+        id: Date.now().toString(),
+        name: "",
         description: "",
-        technologies: "",
-        link: "",
+        tags: "",
+        image_url: "",
+        live_url: "",
+        github_url: "",
         isNew: true,
       },
     ]);
   };
 
-  const updateProject = (id: number, field: string, value: string) => {
+  const updateProject = (id: string, field: string, value: string) => {
     setProjects((prev) =>
       prev.map((proj) => (proj.id === id ? { ...proj, [field]: value } : proj))
     );
   };
 
-  const removeProject = (id: number) => {
+  const removeProject = (id: string) => {
     setProjects((prev) => prev.filter((proj) => proj.id !== id));
   };
 
@@ -203,7 +227,7 @@ const Projects = ({ projects, setProjects }: ProjectsProps) => {
           strategy={verticalListSortingStrategy}
         >
           {projects.map((project, index) => (
-            <SortableProjectItem
+            <SortablePortfolioProjectItem
               key={project.id}
               project={project}
               index={index}
@@ -219,4 +243,4 @@ const Projects = ({ projects, setProjects }: ProjectsProps) => {
   );
 };
 
-export default Projects;
+export default PortfolioProjects;

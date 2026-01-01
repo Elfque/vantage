@@ -12,6 +12,7 @@ type sidebarItemType = {
 export const sidebarItems: sidebarItemType[] = [
   { label: "Dashboard", href: "/", Icon: FaHome },
   { label: "My Resumes", href: "/resumes", Icon: FaFileAlt },
+  { label: "My Portfolios", href: "/portfolio", Icon: RiProfileLine },
   { label: "Create Resume", href: "/resume/new", Icon: TiDocument },
   { label: "Create Portfolio", href: "/portfolio/new", Icon: RiProfileLine },
 ];

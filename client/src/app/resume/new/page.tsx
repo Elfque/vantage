@@ -38,7 +38,6 @@ export default function NewResume() {
     website_url: "",
     summary: "",
   });
-
   const [activeSection, setActiveSection] = useState("personal");
 
   const updatePersonalInfo = (field: string, value: string) => {
@@ -293,14 +292,12 @@ export default function NewResume() {
                         {skills.map(
                           (skill, index) =>
                             skill && (
-                              <div>
-                                <span
-                                  key={`skills-${index}`}
-                                  className="bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 px-2 py-1 rounded text-xs"
-                                >
-                                  {skill.name}
-                                </span>
-                              </div>
+                              <span
+                                key={`skills-${index}`}
+                                className="bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 px-2 py-1 rounded text-xs"
+                              >
+                                {skill.name}
+                              </span>
                             )
                         )}
                       </div>
@@ -350,19 +347,4 @@ export default function NewResume() {
       </div>
     </AppLayout>
   );
-}
-
-{
-  /* <button
-                  onClick={handleExport}
-                  className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-md text-sm font-medium"
-                >
-                  Export PDF
-                </button>
-                <button
-                  onClick={handleShare}
-                  className="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-md text-sm font-medium"
-                >
-                  Share
-                </button> */
 }

@@ -130,13 +130,12 @@ const SortableEducationItem = memo(
 
 SortableEducationItem.displayName = "SortableEducationItem";
 
-const Education = ({
-  education,
-  setEducation,
-}: {
+type EducationProps = {
   education: ResumeEducation[];
   setEducation: React.Dispatch<React.SetStateAction<ResumeEducation[]>>;
-}) => {
+};
+
+const Education = ({ education, setEducation }: EducationProps) => {
   const [editingId, setEditingId] = useState<number | null>(null);
 
   const sensors = useSensors(
@@ -155,6 +154,7 @@ const Education = ({
         field_of_study: "",
         start_date: "",
         graduation_date: "",
+        isNew: true,
       },
     ]);
   };

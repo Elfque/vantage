@@ -155,6 +155,7 @@ const Experiences = ({ experience, setExperience }: ExperienceProp) => {
       start_date: "",
       end_date: "",
       description: "",
+      isNew: true,
     };
     setExperience((prev) => [...prev, newExp]);
   };
@@ -226,76 +227,6 @@ const Experiences = ({ experience, setExperience }: ExperienceProp) => {
           ))}
         </SortableContext>
       </DndContext>
-
-      {/* {experience.map((exp, index) => (
-        <div
-          key={`experience-${index}`}
-          className="border border-gray-200 dark:border-gray-600 rounded-md p-4"
-        >
-          <div className="flex justify-between items-start mb-4">
-            <h4 className="text-md font-medium">Experience {index + 1}</h4>
-            <button
-              onClick={() => removeExperience(index)}
-              className="text-red-600 hover:text-red-800"
-            >
-              Remove
-            </button>
-          </div>
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <Input
-                type="text"
-                value={exp.company}
-                label="Company"
-                onChange={(e) =>
-                  updateExperience(index, "company", e.target.value)
-                }
-                name="company"
-              />
-            </div>
-            <div>
-              <Input
-                label="Position"
-                type="text"
-                value={exp.position}
-                onChange={(e) =>
-                  updateExperience(index, "position", e.target.value)
-                }
-              />
-            </div>
-            <div>
-              <Input
-                label="Start Date"
-                type="month"
-                value={exp.start_date}
-                onChange={(e) =>
-                  updateExperience(index, "start_date", e.target.value)
-                }
-              />
-            </div>
-            <div>
-              <Input
-                label="End Date"
-                type="month"
-                value={exp.end_date}
-                onChange={(e) =>
-                  updateExperience(index, "end_date", e.target.value)
-                }
-              />
-            </div>
-          </div>
-          <div className="mt-4">
-            <Textarea
-              label="Description"
-              value={exp.description}
-              onChange={(e) =>
-                updateExperience(index, "description", e.target.value)
-              }
-              rows={3}
-            />
-          </div>
-        </div>
-      ))} */}
     </div>
   );
 };

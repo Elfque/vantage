@@ -18,7 +18,6 @@ import {
 import { CSS } from "@dnd-kit/utilities";
 import { FaGripVertical, FaRegTrashAlt } from "react-icons/fa";
 import { ResumeSkill } from "@/types/resume";
-import Select from "../Select";
 import Input from "../Input";
 
 const SortableSkillItem = memo(
@@ -54,7 +53,7 @@ const SortableSkillItem = memo(
         ref={setNodeRef}
         style={style}
         {...attributes}
-        className="grid grid-cols-[2rem_1fr_1fr_2rem] items-center gap-2 mb-2"
+        className="grid grid-cols-[2rem_1fr_2rem] items-center gap-2 mb-2"
       >
         <div
           {...listeners}
@@ -72,7 +71,7 @@ const SortableSkillItem = memo(
           onChange={(e) => updateSkill(skill.id, e)}
         />
 
-        <Select
+        {/* <Select
           name="level"
           value={skill.level}
           onFocus={() => setEditingId(skill.id)}
@@ -83,7 +82,7 @@ const SortableSkillItem = memo(
             { label: "Intermediate", value: "intermediate" },
             { label: "Advanced", value: "advanced" },
           ]}
-        />
+        /> */}
 
         <button
           onClick={() => removeSkill(skill.id)}
@@ -98,14 +97,12 @@ const SortableSkillItem = memo(
 
 SortableSkillItem.displayName = "SortableSkillItem";
 
-// ---------------- Parent ----------------
-export default function Skills({
-  skills,
-  setSkills,
-}: {
+type SkillsProps = {
   skills: ResumeSkill[];
   setSkills: React.Dispatch<React.SetStateAction<ResumeSkill[]>>;
-}) {
+};
+
+export default function Skills({ skills, setSkills }: SkillsProps) {
   const [editingId, setEditingId] = useState<number | null>(null);
 
   const sensors = useSensors(
@@ -143,7 +140,10 @@ export default function Skills({
   };
 
   const addSkill = () => {
-    setSkills((prev) => [...prev, { id: Date.now(), name: "", level: "" }]);
+    setSkills((prev) => [
+      ...prev,
+      { id: Date.now(), name: "", level: "", isNew: true },
+    ]);
   };
 
   return (

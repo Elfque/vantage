@@ -69,9 +69,9 @@ const getAPIRequest = async (url: string) => {
     const req = await api.get(url);
     return req.data;
   } catch (error: any) {
-    // if (error.response.status === 401) {
-    //   handleLogOut();
-    // }
+    if (error.response.status === 401) {
+      handleLogOut();
+    }
     throw error;
   }
 };
@@ -81,9 +81,9 @@ const postAPIRequest = async (url: string, payload: any) => {
     const req = await api.post(url, payload);
     return req.data;
   } catch (error: any) {
-    // if (error.response.status === 401) {
-    //   handleLogOut();
-    // }
+    if (error.response.status === 401) {
+      handleLogOut();
+    }
     throw error;
   }
 };
@@ -93,9 +93,9 @@ const putAPIRequest = async (url: string, payload: any) => {
     const req = await api.put(url, payload);
     return req.data;
   } catch (error: any) {
-    // if (error.response.status === 401) {
-    //   handleLogOut();
-    // }
+    if (error.response.status === 401) {
+      handleLogOut();
+    }
     throw error;
   }
 };
@@ -105,9 +105,9 @@ const deleteAPIRequest = async (url: string) => {
     const req = await api.delete(url);
     return req.data;
   } catch (error: any) {
-    // if (error.response.status === 401) {
-    //   handleLogOut();
-    // }
+    if (error.response.status === 401) {
+      handleLogOut();
+    }
     throw error;
   }
 };

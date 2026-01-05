@@ -150,6 +150,37 @@ const getSinglePortfolio = async (req, res) => {
   }
 };
 
+const getSinglePortfolioBySlug = async (req, res) => {
+  const { slug } = req.params;
+
+  try {
+    const [portfolio] = await connect.execute(
+      "SELECT * FROM portfolios WHERE slug = ?",
+      [slug]
+    );
+
+    if (portfolio.length === 0) {
+      return res.status(404).json({ message: "Portfolio not found" });
+    }
+
+    const [projects] = await connect.execute(
+      "SELECT * FROM portfolio_projects WHERE portfolio_id = ?",
+      [portfolio[0].id]
+    );
+
+    const { id, ...rest } = portfolio[0];
+    const fullPortfolio = {
+      ...rest,
+      projects,
+    };
+
+    res.status(200).json(fullPortfolio);
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: "Error fetching portfolio details." });
+  }
+};
+
 const updatePortfolio = async (req, res) => {
   const { id } = req.params;
   const userId = req.user.userId;
@@ -339,4 +370,5 @@ module.exports = {
   getSinglePortfolio,
   updatePortfolio,
   deletePortfolio,
+  getSinglePortfolioBySlug,
 };

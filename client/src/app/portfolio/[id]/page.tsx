@@ -8,6 +8,7 @@ import { getAPIRequest, deleteAPIRequest } from "@/utils/requests";
 import { showErrorToast, showSuccessToast } from "@/utils/ToasterProps";
 import { FaEdit, FaTrash } from "react-icons/fa";
 import DeleteModal from "@/components/resumes/DeleteModal";
+import Link from "next/link";
 
 interface PortfolioData {
   id: string;
@@ -136,23 +137,19 @@ export default function ViewPortfolio() {
 
         <div className="px-4 space-y-6">
           <div className="flex gap-2 justify-end">
-            <button
-              onClick={() =>
-                navigate.push(`/portfolio/view/${portfolioData.id}`)
-              }
+            <Link
+              href={`/portfolio/view/${portfolioData.slug}`}
               className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-md flex items-center gap-2"
             >
               Preview
-            </button>
-            <button
-              onClick={() =>
-                navigate.push(`/portfolio/${portfolioData.id}/edit`)
-              }
+            </Link>
+            <Link
+              href={`/portfolio/${portfolioData.id}/edit`}
               className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-md flex items-center gap-2"
             >
               <FaEdit />
               Edit
-            </button>
+            </Link>
             <button
               onClick={handleDelete}
               className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-md flex items-center gap-2"

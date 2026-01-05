@@ -4,19 +4,23 @@ import { withAuth } from "next-auth/middleware";
 export default withAuth(
   function middleware(req) {
     const { pathname } = req.nextUrl;
-    const unauthenticatedPages = ["/auth", "/auth/signup"];
+    const unauthenticatedPages = ["/auth", "/auth/signup", "/portfolio/view"];
 
-    const isUnauthenticatedPage = unauthenticatedPages.some((page) =>
-      new RegExp(`^${page.replace("*", ".*")}$`).test(pathname)
+    const isPublicPage = unauthenticatedPages.some((page) =>
+      pathname.startsWith(page)
     );
 
+    // const isUnauthenticatedPage = unauthenticatedPages.some((page) =>
+    //   new RegExp(`^${page.replace("*", ".*")}$`).test(pathname)
+    // );
+
     if (req.nextauth.token) {
-      if (isUnauthenticatedPage) {
+      if (isPublicPage) {
         const url = new URL("/", req.url);
         return NextResponse.redirect(url);
       }
     } else {
-      if (!isUnauthenticatedPage) {
+      if (!isPublicPage) {
         const url = new URL("/auth", req.url);
         return NextResponse.redirect(url);
       }

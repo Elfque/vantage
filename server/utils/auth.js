@@ -35,7 +35,7 @@ const googleLogin = async (req, res) => {
 
     const [users] = await connect.execute(
       "SELECT * FROM users WHERE email = ?",
-      [email]
+      [email],
     );
     let user = users[0];
 
@@ -50,7 +50,7 @@ const googleLogin = async (req, res) => {
     } else {
       const [result] = await connect.execute(
         "INSERT INTO users (email, google_id, is_verified) VALUES (?, ?, ?)",
-        [email, googleId, true]
+        [email, googleId, true],
       );
       user = {
         id: result.insertId,
@@ -83,7 +83,7 @@ const login = async (req, res) => {
   try {
     const [rows] = await connect.execute(
       "SELECT id, email, password, full_name, token_version FROM users WHERE email = ?",
-      [email]
+      [email],
     );
     const user = rows[0];
 
@@ -93,7 +93,7 @@ const login = async (req, res) => {
 
     const isMatch = await argon2.verify(
       user.password,
-      password + process.env.PASSWORD_PEPPER
+      password + process.env.PASSWORD_PEPPER,
     );
 
     if (!isMatch) {
@@ -106,7 +106,7 @@ const login = async (req, res) => {
         name: user.full_name,
       },
       process.env.ACCESS_TOKEN_SECRET,
-      { expiresIn: "3d" }
+      { expiresIn: "3d" },
     );
 
     const refreshToken = jwt.sign(
@@ -115,7 +115,7 @@ const login = async (req, res) => {
         version: user.token_version,
       },
       process.env.REFRESH_TOKEN_SECRET,
-      { expiresIn: "7d" }
+      { expiresIn: "7d" },
     );
 
     res.cookie("jid", refreshToken, {
@@ -151,7 +151,7 @@ const register = async (req, res) => {
   try {
     const [existingUser] = await connect.execute(
       "SELECT id FROM users WHERE email = ?",
-      [email]
+      [email],
     );
 
     if (existingUser.length > 0) {
@@ -168,15 +168,13 @@ const register = async (req, res) => {
 
     const [result] = await connect.execute(
       "INSERT INTO users (full_name, email, password) VALUES (?, ?, ?)",
-      [full_name, email, hashedPassword]
+      [full_name, email, hashedPassword],
     );
 
     res.status(201).json({
       message: "User registered successfully.",
-      userId: result.insertId,
     });
   } catch (error) {
-    // console.error("Registration Error:", error);
     res.status(500).json({ message: "Internal server error." });
   }
 };
@@ -195,7 +193,7 @@ const refreshToken = async (req, res) => {
   try {
     const [rows] = await connect.execute(
       "SELECT id, token_version, full_name FROM users WHERE id = ?",
-      [payload.userId]
+      [payload.userId],
     );
     const user = rows[0];
 
@@ -206,13 +204,13 @@ const refreshToken = async (req, res) => {
     const accessToken = jwt.sign(
       { userId: user.id, name: user.full_name },
       process.env.ACCESS_TOKEN_SECRET,
-      { expiresIn: "15m" }
+      { expiresIn: "15m" },
     );
 
     const newRefreshToken = jwt.sign(
       { userId: user.id, version: user.token_version },
       process.env.REFRESH_TOKEN_SECRET,
-      { expiresIn: "7d" }
+      { expiresIn: "7d" },
     );
 
     res.cookie("jid", newRefreshToken, {

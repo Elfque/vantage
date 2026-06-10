@@ -97,6 +97,16 @@ const SortablePortfolioProjectItem = memo(
           />
 
           <Input
+            type="text"
+            label="Tags"
+            placeholder="e.g., React, TypeScript, Node.js"
+            value={project.tags}
+            onFocus={() => setEditingId(project.id)}
+            onBlur={() => setEditingId(null)}
+            onChange={(e) => updateProject(project.id, "tags", e.target.value)}
+          />
+
+          <Input
             type="url"
             label="Live URL"
             placeholder="https://yourproject.com"
@@ -152,6 +162,7 @@ const PortfolioProjects = ({
         link: "",
         githubUrl: "",
         isNew: true,
+        tags: "",
       },
     ]);
   };

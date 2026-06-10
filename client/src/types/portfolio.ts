@@ -16,23 +16,24 @@ export interface PortfolioProject {
   link: string;
   githubUrl: string;
   isNew: boolean;
+  tags: string;
 }
 // image_url: string;
 
 export interface PortfolioSkill {
-  name: string;
-  proficiency: "beginner" | "intermediate" | "advanced" | "expert";
+  skills: string[];
+  category: string;
   isNew: boolean;
 }
 
 export interface PortfolioExperience {
-  id: string;
+  id: number;
   company: string;
-  position: string;
+  role: string;
   startDate: string;
   endDate: string;
-  description: string[];
-  technologies: string;
+  description: string;
+  isNew: boolean;
 }
 
 export interface PortfolioEducation {
@@ -47,7 +48,7 @@ export interface PortfolioData extends PortfolioPersonalData {
   id?: string;
   projects: PortfolioProject[];
   skills: PortfolioSkill[];
-  experience: PortfolioExperience[];
+  experiences: PortfolioExperience[];
   education: PortfolioEducation[];
   resume_ids?: string[];
 }

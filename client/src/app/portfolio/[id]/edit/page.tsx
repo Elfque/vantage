@@ -6,6 +6,7 @@ import { useSession } from "next-auth/react";
 import AppLayout from "@/components/layout/AppLayout";
 import Header from "@/components/layout/Header";
 import {
+  PortfolioExperience,
   PortfolioPersonalData,
   PortfolioProject,
   PortfolioSkill,
@@ -20,6 +21,7 @@ import {
 } from "@/utils/requests";
 import { showErrorToast, showSuccessToast } from "@/utils/ToasterProps";
 import AttachmentSelector from "@/components/AttachmentSelector";
+import PortfolioExperiences from "@/components/portfolios/PortfolioExperiences";
 
 export default function EditPortfolioPage() {
   const params = useParams();
@@ -34,6 +36,7 @@ export default function EditPortfolioPage() {
 
   const [projects, setProjects] = useState<PortfolioProject[]>([]);
   const [skills, setSkills] = useState<PortfolioSkill[]>([]);
+  const [experience, setExperience] = useState<PortfolioExperience[]>([]);
   const [resumeId, setResumeId] = useState<string | null>(null);
   const [portfolioData, setPortfolioData] = useState<PortfolioPersonalData>({
     fullName: session?.user?.name || "",
@@ -54,6 +57,13 @@ export default function EditPortfolioPage() {
     setLoading(true);
     try {
       const data = await getAPIRequest(`/portfolio/${id}`);
+      const newData = {
+        ...data,
+        skills: data.skills.map((s: any) => ({
+          ...s,
+          skills: JSON.parse(s.skills),
+        })),
+      };
       setPortfolioData({
         fullName: data.fullName || "",
         email: data.email || "",
@@ -66,7 +76,8 @@ export default function EditPortfolioPage() {
       });
       setProjects(data.projects || []);
       setResumeId(data.resume_ids?.[0] || null);
-      setSkills(data.skills || []);
+      setSkills(newData.skills || []);
+      setExperience(data.experience || []);
     } catch (error) {
       console.error("Error fetching portfolio:", error);
       showErrorToast("Failed to load portfolio");
@@ -94,6 +105,10 @@ export default function EditPortfolioPage() {
         ...portfolioData,
         projects: newProject,
         skills,
+        experience: experience.map((exp) => {
+          const { id, isNew, ...rest } = exp;
+          return isNew ? { ...rest } : { id, ...rest };
+        }),
         resume_ids: resumeId ? [resumeId] : [],
       };
       await putAPIRequest(`/portfolio/${id}`, payload);
@@ -205,6 +220,13 @@ export default function EditPortfolioPage() {
               <PortfolioPersonalInfo
                 portfolioData={portfolioData}
                 updatePersonalInfo={updatePersonalInfo}
+              />
+            </section>
+
+            <section id="experiences">
+              <PortfolioExperiences
+                experience={experience}
+                setExperience={setExperience}
               />
             </section>
 

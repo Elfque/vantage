@@ -37,7 +37,7 @@ const Textarea: React.FC<TextareaProps> = ({
         value={value}
         onChange={onChange}
         rows={rows}
-        className={`w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-800 dark:text-white transition-all duration-200 ease-in-out resize-vertical ${
+        className={`w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-800 dark:text-white transition-all duration-200 ease-in-out resize-none ${
           error ? "border-red-500 focus:ring-red-500 focus:border-red-500" : ""
         }`}
         onFocus={onFocus}

@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import AppLayout from "@/components/layout/AppLayout";
 import {
+  PortfolioExperience,
   PortfolioPersonalData,
   PortfolioProject,
   PortfolioSkill,
@@ -16,6 +17,7 @@ import AttachmentSelector from "@/components/AttachmentSelector";
 import Header from "@/components/layout/Header";
 import { postAPIRequest } from "@/utils/requests";
 import { showErrorToast, showSuccessToast } from "@/utils/ToasterProps";
+import PortfolioExperiences from "@/components/portfolios/PortfolioExperiences";
 
 export default function NewPortfolio() {
   const { data: session, status } = useSession();
@@ -23,6 +25,7 @@ export default function NewPortfolio() {
 
   const [projects, setProjects] = useState<PortfolioProject[]>([]);
   const [skills, setSkills] = useState<PortfolioSkill[]>([]);
+  const [experience, setExperience] = useState<PortfolioExperience[]>([]);
   const [resumeId, setResumeId] = useState<string | null>(null);
   const [portfolioData, setPortfolioData] = useState<PortfolioPersonalData>({
     fullName: session?.user?.name || "",
@@ -46,6 +49,7 @@ export default function NewPortfolio() {
         ...portfolioData,
         projects,
         skills,
+        experience,
         resume_id: resumeId,
       };
 
@@ -70,6 +74,7 @@ export default function NewPortfolio() {
   const sections = [
     { id: "personal", label: "Personal Info" },
     { id: "projects", label: "Projects" },
+    { id: "experience", label: "Experience" },
     { id: "skills", label: "Skills" },
     { id: "attachments", label: "Attachments" },
   ];
@@ -110,6 +115,13 @@ export default function NewPortfolio() {
               <PortfolioProjects
                 projects={projects}
                 setProjects={setProjects}
+              />
+            )}
+
+            {activeSection === "experience" && (
+              <PortfolioExperiences
+                experience={experience}
+                setExperience={setExperience}
               />
             )}
 

@@ -32,7 +32,14 @@ export default function ViewPortfolio() {
   const fetchPortfolio = async () => {
     try {
       const data = await getAPIRequest(`/portfolio/${portfolioSlug}`);
-      setPortfolioData(data);
+      const newData = {
+        ...data,
+        skills: data.skills.map((s: any) => ({
+          ...s,
+          skills: JSON.parse(s.skills),
+        })),
+      };
+      setPortfolioData(newData);
     } catch (error) {
       console.error("Error fetching portfolio:", error);
       showErrorToast("Failed to load portfolio");
@@ -181,19 +188,18 @@ export default function ViewPortfolio() {
                       key={index}
                       className="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg"
                     >
+                      <h4 className="font-medium text-gray-900 dark:text-white mb-2">
+                        {skillGroup.category}
+                      </h4>
                       <div className="flex flex-wrap gap-2">
-                        <span
-                          key={index}
-                          className="bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 px-2 py-1 rounded text-sm"
-                        >
-                          {skillGroup.name}
-                        </span>
-                        <span
-                          key={index}
-                          className="bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 px-2 py-1 rounded text-sm"
-                        >
-                          {skillGroup.proficiency}
-                        </span>
+                        {skillGroup.skills.map((s: string, j: number) => (
+                          <span
+                            key={`skills-${index}-${j}`}
+                            className="bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 px-2 py-1 rounded text-sm"
+                          >
+                            {s}
+                          </span>
+                        ))}
                       </div>
                     </div>
                   ))}

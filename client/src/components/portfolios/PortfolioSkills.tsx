@@ -17,37 +17,52 @@ import {
 import { CSS } from "@dnd-kit/utilities";
 import { FaGripVertical, FaRegTrashAlt, FaPlus } from "react-icons/fa";
 import { PortfolioSkill } from "@/types/portfolio";
-import Select from "../Select";
 
 const SortableSkillCategoryItem = memo(
   ({
-    skill,
+    skillCategory,
     index,
     editingId,
     setEditingId,
-    updateSkill,
-    removeSkill,
+    updateSkillCategory,
+    removeSkillCategory,
   }: {
-    skill: PortfolioSkill;
+    skillCategory: PortfolioSkill;
     index: number;
     editingId: string | null;
     setEditingId: (id: string | null) => void;
-    updateSkill: (
+    updateSkillCategory: (
       index: number,
       field: string,
       value: string | string[],
     ) => void;
-    removeSkill: (index: number) => void;
+    removeSkillCategory: (index: number) => void;
   }) => {
     const { attributes, listeners, setNodeRef, transform, transition } =
       useSortable({
-        id: `skill-${index}`,
-        disabled: editingId === `skill-${index}`,
+        id: `category-${index}`,
+        disabled: editingId === `category-${index}`,
       });
 
     const style = {
       transform: CSS.Transform.toString(transform),
       transition,
+    };
+
+    const addSkill = () => {
+      const newSkills = [...skillCategory.skills, ""];
+      updateSkillCategory(index, "skills", newSkills);
+    };
+
+    const updateSkill = (skillIndex: number, value: string) => {
+      const newSkills = [...skillCategory.skills];
+      newSkills[skillIndex] = value;
+      updateSkillCategory(index, "skills", newSkills);
+    };
+
+    const removeSkill = (skillIndex: number) => {
+      const newSkills = skillCategory.skills.filter((_, i) => i !== skillIndex);
+      updateSkillCategory(index, "skills", newSkills);
     };
 
     return (
@@ -56,39 +71,72 @@ const SortableSkillCategoryItem = memo(
         style={style}
         className="bg-gray-50 dark:bg-gray-800 p-4 rounded-lg border border-gray-200 dark:border-gray-700"
       >
-        <div className="flex gap-2 items-center">
+        <div className="flex justify-between items-start mb-3">
+          <div className="flex items-center gap-2">
+            <button
+              {...attributes}
+              {...listeners}
+              className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 cursor-grab active:cursor-grabbing"
+            >
+              <FaGripVertical />
+            </button>
+            <span className="text-sm text-gray-500 dark:text-gray-400">
+              Category {index + 1}
+            </span>
+          </div>
           <button
-            {...attributes}
-            {...listeners}
-            className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 cursor-grab active:cursor-grabbing -mt-6"
-          >
-            <FaGripVertical />
-          </button>
-          <Input
-            type="text"
-            placeholder="Skill name"
-            value={skill.name}
-            onFocus={() => setEditingId(`category-${index}`)}
-            onBlur={() => setEditingId(null)}
-            onChange={(e) => updateSkill(index, "name", e.target.value)}
-          />
-          <Select
-            value={skill.proficiency}
-            onChange={(e) => updateSkill(index, "proficiency", e.target.value)}
-            name={"proficiency"}
-            options={[
-              { value: "beginner", label: "Beginner" },
-              { value: "intermediate", label: "Intermediate" },
-              { value: "advanced", label: "Advanced" },
-              { value: "expert", label: "Expert" },
-            ]}
-          />
-          <button
-            onClick={() => removeSkill(index)}
-            className="text-red-500 hover:text-red-700 -mt-6"
+            onClick={() => removeSkillCategory(index)}
+            className="text-red-500 hover:text-red-700"
           >
             <FaRegTrashAlt />
           </button>
+        </div>
+
+        <div className="space-y-3">
+          <Input
+            type="text"
+            label="Category Name"
+            placeholder="e.g., Frontend, Backend, Tools"
+            value={skillCategory.category}
+            onFocus={() => setEditingId(`category-${index}`)}
+            onBlur={() => setEditingId(null)}
+            onChange={(e) =>
+              updateSkillCategory(index, "category", e.target.value)
+            }
+          />
+
+          <div className="space-y-2">
+            <div className="flex justify-between items-center">
+              <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                Skills
+              </label>
+              <button
+                onClick={addSkill}
+                className="text-blue-600 hover:text-blue-800 text-sm flex items-center gap-1"
+              >
+                <FaPlus className="text-xs" />
+                Add Skill
+              </button>
+            </div>
+            {skillCategory?.skills?.map((skill, skillIndex) => (
+              <div key={skillIndex} className="flex gap-2">
+                <Input
+                  type="text"
+                  placeholder="Skill name"
+                  value={skill}
+                  onFocus={() => setEditingId(`category-${index}`)}
+                  onBlur={() => setEditingId(null)}
+                  onChange={(e) => updateSkill(skillIndex, e.target.value)}
+                />
+                <button
+                  onClick={() => removeSkill(skillIndex)}
+                  className="text-red-500 hover:text-red-700 mt-2"
+                >
+                  <FaRegTrashAlt />
+                </button>
+              </div>
+            ))}
+          </div>
         </div>
       </div>
     );
@@ -115,9 +163,9 @@ const PortfolioSkills = ({ skills, setSkills }: PortfolioSkillsProps) => {
     setSkills((prev) => [
       ...prev,
       {
-        name: "",
+        category: "",
+        skills: [""],
         isNew: true,
-        proficiency: "intermediate",
       },
     ]);
   };
@@ -157,7 +205,7 @@ const PortfolioSkills = ({ skills, setSkills }: PortfolioSkillsProps) => {
           onClick={addSkillCategory}
           className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded-md text-sm"
         >
-          Add Skill
+          Add Category
         </button>
       </div>
 
@@ -170,15 +218,15 @@ const PortfolioSkills = ({ skills, setSkills }: PortfolioSkillsProps) => {
           items={skills.map((_, index) => `category-${index}`)}
           strategy={verticalListSortingStrategy}
         >
-          {skills.map((skill, index) => (
+          {skills.map((skillCategory, index) => (
             <SortableSkillCategoryItem
-              key={`skill-${index}`}
-              skill={skill}
+              key={`category-${index}`}
+              skillCategory={skillCategory}
               index={index}
               editingId={editingId}
               setEditingId={setEditingId}
-              updateSkill={updateSkillCategory}
-              removeSkill={removeSkillCategory}
+              updateSkillCategory={updateSkillCategory}
+              removeSkillCategory={removeSkillCategory}
             />
           ))}
         </SortableContext>

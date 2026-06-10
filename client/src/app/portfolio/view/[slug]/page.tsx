@@ -25,7 +25,14 @@ export default function PortfolioPreview() {
   const fetchPortfolio = async () => {
     try {
       const data = await getAPIRequest(`/portfolio/slug/${slug}`);
-      setPortfolioData(data);
+      const newData = {
+        ...data,
+        skills: data.skills.map((s: any) => ({
+          ...s,
+          skills: JSON.parse(s.skills),
+        })),
+      };
+      setPortfolioData(newData);
     } catch (error) {
       console.error("Error fetching portfolio:", error);
       showErrorToast("Failed to load portfolio");
@@ -131,7 +138,7 @@ export default function PortfolioPreview() {
           )}
 
           {/* Skills */}
-          {/* {portfolioData.skills && portfolioData.skills.length > 0 && (
+          {portfolioData.skills && portfolioData.skills.length > 0 && (
             <section className="mb-16">
               <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-8 text-center">
                 Skills
@@ -159,39 +166,40 @@ export default function PortfolioPreview() {
                 ))}
               </div>
             </section>
-          )} */}
+          )}
 
           {/* Experience */}
-          {portfolioData.experience && portfolioData.experience.length > 0 && (
-            <section className="mb-16">
-              <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-8 text-center">
-                Experience
-              </h2>
-              <div className="space-y-6">
-                {portfolioData.experience.map((exp) => (
-                  <div
-                    key={exp.id}
-                    className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-8"
-                  >
-                    <div className="flex justify-between items-start mb-4">
-                      <div>
-                        <h3 className="text-2xl font-semibold text-gray-900 dark:text-white">
-                          {exp.position}
-                        </h3>
-                        <p className="text-lg text-blue-600 dark:text-blue-400 font-medium">
-                          {exp.company}
-                        </p>
+          {portfolioData.experiences &&
+            portfolioData.experiences?.length > 0 && (
+              <section className="mb-16">
+                <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-8 text-center">
+                  Experience
+                </h2>
+                <div className="space-y-6">
+                  {portfolioData.experiences?.map((exp) => (
+                    <div
+                      key={exp.id}
+                      className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-8"
+                    >
+                      <div className="flex justify-between items-start mb-4">
+                        <div>
+                          <h3 className="text-2xl font-semibold text-gray-900 dark:text-white">
+                            {exp.role}
+                          </h3>
+                          <p className="text-lg text-blue-600 dark:text-blue-400 font-medium">
+                            {exp.company}
+                          </p>
+                        </div>
+                        <div className="text-right text-gray-600 dark:text-gray-400">
+                          <p className="font-medium">
+                            {exp.startDate} - {exp.endDate || "Present"}
+                          </p>
+                        </div>
                       </div>
-                      <div className="text-right text-gray-600 dark:text-gray-400">
-                        <p className="font-medium">
-                          {exp.startDate} - {exp.endDate || "Present"}
-                        </p>
-                      </div>
-                    </div>
-                    <p className="text-gray-700 dark:text-gray-300 mb-4 leading-relaxed">
-                      {exp.description}
-                    </p>
-                    {exp.technologies && (
+                      <p className="text-gray-700 dark:text-gray-300 mb-4 leading-relaxed">
+                        {exp.description}
+                      </p>
+                      {/* {exp.technologies && (
                       <div className="flex flex-wrap gap-2">
                         {exp.technologies.split(",").map((tech, index) => (
                           <span
@@ -202,12 +210,12 @@ export default function PortfolioPreview() {
                           </span>
                         ))}
                       </div>
-                    )}
-                  </div>
-                ))}
-              </div>
-            </section>
-          )}
+                    )} */}
+                    </div>
+                  ))}
+                </div>
+              </section>
+            )}
 
           {/* Projects */}
           {portfolioData.projects && portfolioData.projects.length > 0 && (

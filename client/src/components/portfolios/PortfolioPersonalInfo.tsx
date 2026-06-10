@@ -20,10 +20,10 @@ const PortfolioPersonalInfo = ({
         <div>
           <Input
             type="text"
-            value={portfolioData.full_name}
-            onChange={(e) => updatePersonalInfo("full_name", e.target.value)}
+            value={portfolioData.fullName}
+            onChange={(e) => updatePersonalInfo("fullName", e.target.value)}
             label="Full Name"
-            name="full_name"
+            name="fullName"
           />
         </div>
         <div>
@@ -39,29 +39,27 @@ const PortfolioPersonalInfo = ({
           <Input
             label="Email"
             type="email"
-            value={portfolioData.contact_email}
-            onChange={(e) =>
-              updatePersonalInfo("contact_email", e.target.value)
-            }
-            name="contact_email"
+            value={portfolioData.email}
+            onChange={(e) => updatePersonalInfo("email", e.target.value)}
+            name="email"
           />
         </div>
         <div>
           <Input
             label="LinkedIn URL"
             type="url"
-            value={portfolioData.linkedin_url}
-            onChange={(e) => updatePersonalInfo("linkedin_url", e.target.value)}
-            name="linkedin_url"
+            value={portfolioData.linkedlnUrl}
+            onChange={(e) => updatePersonalInfo("linkedlnUrl", e.target.value)}
+            name="linkedlnUrl"
           />
         </div>
         <div>
           <Input
             label="GitHub URL"
             type="url"
-            value={portfolioData.github_url}
-            onChange={(e) => updatePersonalInfo("github_url", e.target.value)}
-            name="github_url"
+            value={portfolioData.githubUrl}
+            onChange={(e) => updatePersonalInfo("githubUrl", e.target.value)}
+            name="githubUrl"
           />
         </div>
         <div>
@@ -77,20 +75,10 @@ const PortfolioPersonalInfo = ({
       </div>
       <div>
         <Textarea
-          label="Bio"
-          value={portfolioData.bio}
-          onChange={(e) => updatePersonalInfo("bio", e.target.value)}
-          name="bio"
-          rows={3}
-          placeholder="Tell us about yourself..."
-        />
-      </div>
-      <div>
-        <Textarea
           label="Summary"
-          value={portfolioData.summary}
-          onChange={(e) => updatePersonalInfo("summary", e.target.value)}
-          name="summary"
+          value={portfolioData.description}
+          onChange={(e) => updatePersonalInfo("description", e.target.value)}
+          name="description"
           rows={4}
           placeholder="A brief summary of your professional background..."
         />
@@ -99,9 +87,9 @@ const PortfolioPersonalInfo = ({
         <Input
           label="Theme Color"
           type="color"
-          value={portfolioData.theme_color}
-          onChange={(e) => updatePersonalInfo("theme_color", e.target.value)}
-          name="theme_color"
+          value={portfolioData.colorTheme}
+          onChange={(e) => updatePersonalInfo("colorTheme", e.target.value)}
+          name="colorTheme"
         />
       </div>
     </div>

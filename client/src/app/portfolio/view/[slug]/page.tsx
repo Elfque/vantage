@@ -5,55 +5,14 @@ import { useParams } from "next/navigation";
 import { getAPIRequest } from "@/utils/requests";
 import { showErrorToast } from "@/utils/ToasterProps";
 import ViewPortflioLayout from "@/components/layout/ViewPortflioLayout";
-
-interface PortfolioData {
-  id: string;
-  full_name: string;
-  title: string;
-  contact_email: string;
-  linkedin_url: string;
-  github_url: string;
-  bio: string;
-  slug: string;
-  theme_color: string;
-  summary: string;
-  projects: Array<{
-    id: string;
-    name: string;
-    description: string;
-    tags: string;
-    image_url: string;
-    live_url: string;
-    github_url: string;
-  }>;
-  skills: Array<{
-    category: string;
-    skills: string[];
-  }>;
-  experience: Array<{
-    id: string;
-    company: string;
-    position: string;
-    startDate: string;
-    endDate: string;
-    description: string;
-    technologies: string;
-  }>;
-  education: Array<{
-    id: string;
-    institution: string;
-    degree: string;
-    field: string;
-    graduationDate: string;
-  }>;
-}
+import { PortfolioData } from "@/types/portfolio";
 
 export default function PortfolioPreview() {
   const params = useParams();
   const slug = params.slug as string;
 
   const [portfolioData, setPortfolioData] = useState<PortfolioData | null>(
-    null
+    null,
   );
   const [loading, setLoading] = useState(true);
 
@@ -100,23 +59,23 @@ export default function PortfolioPreview() {
 
   return (
     <ViewPortflioLayout
-      title={portfolioData.full_name}
-      desc={portfolioData.summary}
+      title={portfolioData.fullName}
+      desc={portfolioData.description}
     >
       <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
         <header
           className="py-16 px-4 sm:px-6 lg:px-8"
-          style={{ backgroundColor: portfolioData.theme_color }}
+          style={{ backgroundColor: portfolioData.colorTheme }}
         >
           <div className="max-w-4xl mx-auto text-center">
             <h1 className="text-4xl md:text-6xl font-bold text-white mb-4">
-              {portfolioData.full_name}
+              {portfolioData.fullName}
             </h1>
             <p className="text-xl md:text-2xl text-white/90 mb-6">
               {portfolioData.title}
             </p>
             <p className="text-lg text-white/80 max-w-2xl mx-auto">
-              {portfolioData.summary}
+              {portfolioData.description}
             </p>
           </div>
         </header>
@@ -126,17 +85,17 @@ export default function PortfolioPreview() {
           {/* Contact Info */}
           <section className="mb-16 text-center">
             <div className="flex justify-center space-x-6">
-              {portfolioData.contact_email && (
+              {portfolioData.email && (
                 <a
-                  href={`mailto:${portfolioData.contact_email}`}
+                  href={`mailto:${portfolioData.email}`}
                   className="text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
                 >
                   Email
                 </a>
               )}
-              {portfolioData.linkedin_url && (
+              {portfolioData.linkedlnUrl && (
                 <a
-                  href={portfolioData.linkedin_url}
+                  href={portfolioData.linkedlnUrl}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
@@ -144,9 +103,9 @@ export default function PortfolioPreview() {
                   LinkedIn
                 </a>
               )}
-              {portfolioData.github_url && (
+              {portfolioData.githubUrl && (
                 <a
-                  href={portfolioData.github_url}
+                  href={portfolioData.githubUrl}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
@@ -158,21 +117,21 @@ export default function PortfolioPreview() {
           </section>
 
           {/* Summary */}
-          {portfolioData.summary && (
+          {portfolioData.description && (
             <section className="mb-16">
               <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-8 text-center">
                 About
               </h2>
               <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-8">
                 <p className="text-lg text-gray-700 dark:text-gray-300 leading-relaxed">
-                  {portfolioData.bio}
+                  {portfolioData.description}
                 </p>
               </div>
             </section>
           )}
 
           {/* Skills */}
-          {portfolioData.skills && portfolioData.skills.length > 0 && (
+          {/* {portfolioData.skills && portfolioData.skills.length > 0 && (
             <section className="mb-16">
               <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-8 text-center">
                 Skills
@@ -200,7 +159,7 @@ export default function PortfolioPreview() {
                 ))}
               </div>
             </section>
-          )}
+          )} */}
 
           {/* Experience */}
           {portfolioData.experience && portfolioData.experience.length > 0 && (
@@ -262,21 +221,21 @@ export default function PortfolioPreview() {
                     key={project.id}
                     className="bg-white dark:bg-gray-800 rounded-lg shadow-lg overflow-hidden"
                   >
-                    {project.image_url && (
+                    {/* {project.image_url && (
                       <img
                         src={project.image_url}
                         alt={project.name}
                         className="w-full h-48 object-cover"
                       />
-                    )}
+                    )} */}
                     <div className="p-6">
                       <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
-                        {project.name}
+                        {project.title}
                       </h3>
                       <p className="text-gray-700 dark:text-gray-300 mb-4">
                         {project.description}
                       </p>
-                      {project.tags && (
+                      {/* {project.tags && (
                         <div className="flex flex-wrap gap-2 mb-4">
                           {project.tags.split(",").map((tag, index) => (
                             <span
@@ -287,11 +246,11 @@ export default function PortfolioPreview() {
                             </span>
                           ))}
                         </div>
-                      )}
+                      )} */}
                       <div className="flex gap-4">
-                        {project.live_url && (
+                        {project.link && (
                           <a
-                            href={project.live_url}
+                            href={project.link}
                             target="_blank"
                             rel="noopener noreferrer"
                             className="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 font-medium"
@@ -299,9 +258,9 @@ export default function PortfolioPreview() {
                             Live Demo →
                           </a>
                         )}
-                        {project.github_url && (
+                        {project.githubUrl && (
                           <a
-                            href={project.github_url}
+                            href={project.githubUrl}
                             target="_blank"
                             rel="noopener noreferrer"
                             className="text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-300 font-medium"
@@ -353,7 +312,7 @@ export default function PortfolioPreview() {
         <footer className="bg-gray-100 dark:bg-gray-800 py-8 px-4 sm:px-6 lg:px-8">
           <div className="max-w-4xl mx-auto text-center">
             <p className="text-gray-600 dark:text-gray-400">
-              © {new Date().getFullYear()} {portfolioData.full_name}. Built with
+              © {new Date().getFullYear()} {portfolioData.fullName}. Built with
               Resume Builder.
             </p>
           </div>

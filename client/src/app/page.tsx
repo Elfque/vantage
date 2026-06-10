@@ -15,7 +15,6 @@ export default function Dashboard() {
   const handleCreateResume = () => {
     router.push("/resume/new");
   };
-
   const handleCreatePortfolio = () => {
     router.push("/portfolio/new");
   };

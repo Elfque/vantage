@@ -25,15 +25,14 @@ export default function NewPortfolio() {
   const [skills, setSkills] = useState<PortfolioSkill[]>([]);
   const [resumeId, setResumeId] = useState<string | null>(null);
   const [portfolioData, setPortfolioData] = useState<PortfolioPersonalData>({
-    full_name: session?.user?.name || "",
-    contact_email: session?.user?.email || "",
+    fullName: session?.user?.name || "",
+    email: session?.user?.email || "",
     title: "",
-    linkedin_url: "",
-    github_url: "",
-    bio: "",
+    linkedlnUrl: "",
+    githubUrl: "",
     slug: "",
-    theme_color: "#3B82F6",
-    summary: "",
+    colorTheme: "#3B82F6",
+    description: "",
   });
   const [activeSection, setActiveSection] = useState("personal");
 
@@ -53,9 +52,10 @@ export default function NewPortfolio() {
       const response = await postAPIRequest("/portfolio/create", payload);
       showSuccessToast("Portfolio created successfully!");
       router.push("/portfolio");
-    } catch (error) {
-      console.error("Error creating portfolio:", error);
-      showErrorToast("Failed to create portfolio");
+    } catch (error: any) {
+      showErrorToast(
+        error.response.data.message ?? "Failed to create portfolio",
+      );
     }
   };
 

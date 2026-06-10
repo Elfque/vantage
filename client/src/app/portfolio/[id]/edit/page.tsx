@@ -36,15 +36,14 @@ export default function EditPortfolioPage() {
   const [skills, setSkills] = useState<PortfolioSkill[]>([]);
   const [resumeId, setResumeId] = useState<string | null>(null);
   const [portfolioData, setPortfolioData] = useState<PortfolioPersonalData>({
-    full_name: session?.user?.name || "",
-    contact_email: session?.user?.email || "",
+    fullName: session?.user?.name || "",
+    email: session?.user?.email || "",
     title: "",
-    linkedin_url: "",
-    github_url: "",
-    bio: "",
+    linkedlnUrl: "",
+    githubUrl: "",
     slug: "",
-    theme_color: "#3B82F6",
-    summary: "",
+    colorTheme: "#3B82F6",
+    description: "",
   });
 
   useEffect(() => {
@@ -55,21 +54,19 @@ export default function EditPortfolioPage() {
     setLoading(true);
     try {
       const data = await getAPIRequest(`/portfolio/${id}`);
-      // normalize data to local state shape
       setPortfolioData({
-        full_name: data.full_name || "",
-        contact_email: data.contact_email || "",
+        fullName: data.fullName || "",
+        email: data.email || "",
         title: data.title || "",
-        linkedin_url: data.linkedin_url || "",
-        github_url: data.github_url || "",
-        bio: data.bio || "",
+        linkedlnUrl: data.linkedlnUrl || "",
+        githubUrl: data.githubUrl || "",
         slug: data.slug || "",
-        theme_color: data.theme_color || "#3B82F6",
-        summary: data.summary || "",
+        colorTheme: data.colorTheme || "#3B82F6",
+        description: data.description || "",
       });
       setProjects(data.projects || []);
       setResumeId(data.resume_ids?.[0] || null);
-      //   setSkills(data.skills || []);
+      setSkills(data.skills || []);
     } catch (error) {
       console.error("Error fetching portfolio:", error);
       showErrorToast("Failed to load portfolio");

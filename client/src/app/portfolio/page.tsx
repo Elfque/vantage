@@ -9,13 +9,14 @@ import { showErrorToast, showSuccessToast } from "@/utils/ToasterProps";
 import { FaEye, FaEdit, FaTrash, FaPlus } from "react-icons/fa";
 import Link from "next/link";
 import DeleteModal from "@/components/resumes/DeleteModal";
+import { formatDate } from "@/utils/functions";
 
 interface PortfolioResponseData {
   id: string;
   slug: string;
   title: string;
-  full_name: string;
-  created_at: string;
+  fullName: string;
+  createdAt: string;
 }
 
 export default function PortfoliosPage() {
@@ -34,15 +35,13 @@ export default function PortfoliosPage() {
     getAPIRequest("/portfolio")
       .then(({ data }) => {
         setPortfolios(data);
-        setLoading(false);
       })
       .catch((err) => {
-        console.log(err.response.data.message);
         showErrorToast(
-          err.response.data.message ?? "Failed to load portfolios"
+          err.response.data.message ?? "Failed to load portfolios",
         );
-        setLoading(false);
-      });
+      })
+      .finally(() => setLoading(false));
   };
 
   const handleDelete = async (id: string) => {
@@ -53,15 +52,16 @@ export default function PortfoliosPage() {
   const confirmDelete = async () => {
     setDeleting(true);
     try {
-      await deleteAPIRequest(`/portfolio/${selectedId}`);
-      showSuccessToast("Portfolio deleted successfully");
-      fetchPortfolios();
-      setSelectedId("");
-      setShowDeleteModal(false);
-      setDeleting(false);
+      await deleteAPIRequest(`/portfolio/${selectedId}`).then(() => {
+        showSuccessToast("Portfolio deleted successfully");
+        fetchPortfolios();
+        setSelectedId("");
+        setShowDeleteModal(false);
+      });
     } catch (error) {
-      setDeleting(false);
       showErrorToast("Failed to delete portfolio");
+    } finally {
+      setDeleting(false);
     }
   };
 
@@ -147,13 +147,13 @@ export default function PortfoliosPage() {
                     </div>
                   </div>
                   <p className="text-sm text-gray-600 dark:text-gray-400">
-                    {portfolio.full_name}
+                    {portfolio.fullName}
                   </p>
 
                   <div className="text-sm text-gray-500 dark:text-gray-400">
                     <p>
                       Created:{" "}
-                      {new Date(portfolio.created_at).toLocaleDateString()}
+                      {new Date(portfolio.createdAt).toLocaleDateString()}
                     </p>
                   </div>
                 </div>

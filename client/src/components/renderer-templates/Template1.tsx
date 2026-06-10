@@ -1,11 +1,4 @@
-import {
-  Document,
-  Page,
-  Text,
-  View,
-  StyleSheet,
-  Link,
-} from "@react-pdf/renderer";
+import { Text, View, StyleSheet, Link } from "@react-pdf/renderer";
 import { ResumeDataResponse } from "@/types/resume";
 import { formatDate } from "@/utils/functions";
 

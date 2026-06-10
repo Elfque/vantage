@@ -9,48 +9,7 @@ import { showErrorToast, showSuccessToast } from "@/utils/ToasterProps";
 import { FaEdit, FaTrash } from "react-icons/fa";
 import DeleteModal from "@/components/resumes/DeleteModal";
 import Link from "next/link";
-
-interface PortfolioData {
-  id: string;
-  full_name: string;
-  title: string;
-  contact_email: string;
-  linkedin_url: string;
-  github_url: string;
-  bio: string;
-  slug: string;
-  theme_color: string;
-  summary: string;
-  projects: Array<{
-    id: string;
-    name: string;
-    description: string;
-    tags: string;
-    image_url: string;
-    live_url: string;
-    github_url: string;
-  }>;
-  skills: Array<{
-    category: string;
-    skills: string[];
-  }>;
-  experience: Array<{
-    id: string;
-    company: string;
-    position: string;
-    startDate: string;
-    endDate: string;
-    description: string;
-    technologies: string;
-  }>;
-  education: Array<{
-    id: string;
-    institution: string;
-    degree: string;
-    field: string;
-    graduationDate: string;
-  }>;
-}
+import { PortfolioData } from "@/types/portfolio";
 
 export default function ViewPortfolio() {
   const router = useParams();
@@ -58,7 +17,7 @@ export default function ViewPortfolio() {
   const portfolioSlug = router.id as string;
 
   const [portfolioData, setPortfolioData] = useState<PortfolioData | null>(
-    null
+    null,
   );
   const [loading, setLoading] = useState(true);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
@@ -163,24 +122,21 @@ export default function ViewPortfolio() {
             {/* Personal Info */}
             <div className="mb-8">
               <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">
-                {portfolioData.full_name}
+                {portfolioData.fullName}
               </h2>
               <p className="text-lg text-gray-600 dark:text-gray-400 mb-2">
                 {portfolioData.title}
               </p>
-              <p className="text-gray-700 dark:text-gray-300 mb-4">
-                {portfolioData.bio}
-              </p>
               <div className="flex gap-4 text-sm text-gray-600 dark:text-gray-400">
                 <a
-                  href={`mailto:${portfolioData.contact_email}`}
+                  href={`mailto:${portfolioData.email}`}
                   className="hover:text-blue-600"
                 >
-                  {portfolioData.contact_email}
+                  {portfolioData.email}
                 </a>
-                {portfolioData.linkedin_url && (
+                {portfolioData.linkedlnUrl && (
                   <a
-                    href={portfolioData.linkedin_url}
+                    href={portfolioData.linkedlnUrl}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="hover:text-blue-600"
@@ -188,9 +144,9 @@ export default function ViewPortfolio() {
                     LinkedIn
                   </a>
                 )}
-                {portfolioData.github_url && (
+                {portfolioData.githubUrl && (
                   <a
-                    href={portfolioData.github_url}
+                    href={portfolioData.githubUrl}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="hover:text-blue-600"
@@ -201,14 +157,14 @@ export default function ViewPortfolio() {
               </div>
             </div>
 
-            {/* Summary */}
-            {portfolioData.summary && (
+            {/* Description */}
+            {portfolioData.description && (
               <div className="mb-8">
                 <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
-                  Summary
+                  Description
                 </h3>
                 <p className="text-gray-700 dark:text-gray-300">
-                  {portfolioData.summary}
+                  {portfolioData.description}
                 </p>
               </div>
             )}
@@ -225,18 +181,19 @@ export default function ViewPortfolio() {
                       key={index}
                       className="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg"
                     >
-                      <h4 className="font-medium text-gray-900 dark:text-white mb-2">
-                        {skillGroup.category}
-                      </h4>
                       <div className="flex flex-wrap gap-2">
-                        {skillGroup.skills.map((skill, skillIndex) => (
-                          <span
-                            key={skillIndex}
-                            className="bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 px-2 py-1 rounded text-sm"
-                          >
-                            {skill}
-                          </span>
-                        ))}
+                        <span
+                          key={index}
+                          className="bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 px-2 py-1 rounded text-sm"
+                        >
+                          {skillGroup.name}
+                        </span>
+                        <span
+                          key={index}
+                          className="bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 px-2 py-1 rounded text-sm"
+                        >
+                          {skillGroup.proficiency}
+                        </span>
                       </div>
                     </div>
                   ))}
@@ -257,20 +214,15 @@ export default function ViewPortfolio() {
                       className="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg"
                     >
                       <h4 className="font-semibold text-gray-900 dark:text-white mb-2">
-                        {project.name}
+                        {project.title}
                       </h4>
                       <p className="text-gray-700 dark:text-gray-300 mb-3">
                         {project.description}
                       </p>
-                      {project.tags && (
-                        <p className="text-sm text-gray-600 dark:text-gray-400 mb-3">
-                          <strong>Tags:</strong> {project.tags}
-                        </p>
-                      )}
                       <div className="flex gap-2">
-                        {project.live_url && (
+                        {project.link && (
                           <a
-                            href={project.live_url}
+                            href={project.link}
                             target="_blank"
                             rel="noopener noreferrer"
                             className="text-blue-600 hover:text-blue-800 text-sm"
@@ -278,9 +230,9 @@ export default function ViewPortfolio() {
                             Live Demo
                           </a>
                         )}
-                        {project.github_url && (
+                        {project.githubUrl && (
                           <a
-                            href={project.github_url}
+                            href={project.githubUrl}
                             target="_blank"
                             rel="noopener noreferrer"
                             className="text-blue-600 hover:text-blue-800 text-sm"

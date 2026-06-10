@@ -78,10 +78,10 @@ const SortablePortfolioProjectItem = memo(
             type="text"
             label="Project Name"
             placeholder="e.g., E-commerce Website"
-            value={project.name}
+            value={project.title}
             onFocus={() => setEditingId(project.id)}
             onBlur={() => setEditingId(null)}
-            onChange={(e) => updateProject(project.id, "name", e.target.value)}
+            onChange={(e) => updateProject(project.id, "title", e.target.value)}
           />
 
           <Textarea
@@ -97,54 +97,30 @@ const SortablePortfolioProjectItem = memo(
           />
 
           <Input
-            type="text"
-            label="Tags"
-            placeholder="e.g., React, TypeScript, Node.js"
-            value={project.tags}
-            onFocus={() => setEditingId(project.id)}
-            onBlur={() => setEditingId(null)}
-            onChange={(e) => updateProject(project.id, "tags", e.target.value)}
-          />
-
-          <Input
             type="url"
             label="Live URL"
             placeholder="https://yourproject.com"
-            value={project.live_url}
+            value={project.link}
             onFocus={() => setEditingId(project.id)}
             onBlur={() => setEditingId(null)}
-            onChange={(e) =>
-              updateProject(project.id, "live_url", e.target.value)
-            }
+            onChange={(e) => updateProject(project.id, "link", e.target.value)}
           />
 
           <Input
             type="url"
             label="GitHub URL"
             placeholder="https://github.com/username/project"
-            value={project.github_url}
+            value={project.githubUrl}
             onFocus={() => setEditingId(project.id)}
             onBlur={() => setEditingId(null)}
             onChange={(e) =>
-              updateProject(project.id, "github_url", e.target.value)
-            }
-          />
-
-          <Input
-            type="url"
-            label="Image URL"
-            placeholder="https://example.com/project-image.jpg"
-            value={project.image_url}
-            onFocus={() => setEditingId(project.id)}
-            onBlur={() => setEditingId(null)}
-            onChange={(e) =>
-              updateProject(project.id, "image_url", e.target.value)
+              updateProject(project.id, "githubUrl", e.target.value)
             }
           />
         </div>
       </div>
     );
-  }
+  },
 );
 
 SortablePortfolioProjectItem.displayName = "SortablePortfolioProjectItem";
@@ -163,7 +139,7 @@ const PortfolioProjects = ({
   const sensors = useSensors(
     useSensor(PointerSensor, {
       activationConstraint: { distance: 8 },
-    })
+    }),
   );
 
   const addProject = () => {
@@ -171,12 +147,10 @@ const PortfolioProjects = ({
       ...prev,
       {
         id: Date.now().toString(),
-        name: "",
+        title: "",
         description: "",
-        tags: "",
-        image_url: "",
-        live_url: "",
-        github_url: "",
+        link: "",
+        githubUrl: "",
         isNew: true,
       },
     ]);
@@ -184,7 +158,7 @@ const PortfolioProjects = ({
 
   const updateProject = (id: string, field: string, value: string) => {
     setProjects((prev) =>
-      prev.map((proj) => (proj.id === id ? { ...proj, [field]: value } : proj))
+      prev.map((proj) => (proj.id === id ? { ...proj, [field]: value } : proj)),
     );
   };
 

@@ -1,29 +1,27 @@
 export interface PortfolioPersonalData {
-  full_name: string;
+  fullName: string;
   title: string;
-  contact_email: string;
-  linkedin_url: string;
-  github_url: string;
-  bio: string;
+  email: string;
+  linkedlnUrl: string;
+  githubUrl: string;
   slug: string;
-  theme_color: string;
-  summary: string;
+  colorTheme: string;
+  description: string;
 }
 
 export interface PortfolioProject {
   id: string;
-  name: string;
+  title: string;
   description: string;
-  tags: string;
-  image_url: string;
-  live_url: string;
-  github_url: string;
+  link: string;
+  githubUrl: string;
   isNew: boolean;
 }
+// image_url: string;
 
 export interface PortfolioSkill {
-  category: string;
-  skills: string[];
+  name: string;
+  proficiency: "beginner" | "intermediate" | "advanced" | "expert";
   isNew: boolean;
 }
 
@@ -33,7 +31,7 @@ export interface PortfolioExperience {
   position: string;
   startDate: string;
   endDate: string;
-  description: string;
+  description: string[];
   technologies: string;
 }
 
@@ -46,9 +44,16 @@ export interface PortfolioEducation {
 }
 
 export interface PortfolioData extends PortfolioPersonalData {
+  id?: string;
   projects: PortfolioProject[];
   skills: PortfolioSkill[];
   experience: PortfolioExperience[];
   education: PortfolioEducation[];
   resume_ids?: string[];
 }
+
+// LINKS
+// GITHUB : https://github.com/Elfque
+// LINKEDIN : https://www.linkedin.com/in/adeyemifaruqfrontendwebdeveloper/
+
+// PROJECT

@@ -4,8 +4,7 @@ const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 const argon2 = require("argon2");
 const jwt = require("jsonwebtoken");
 const { body, validationResult } = require("express-validator");
-
-const connect = require("../db/db");
+const { v4 } = require("uuid");
 
 const registerValidation = [
   body("full_name").trim().notEmpty().withMessage("Name is required").escape(),
@@ -20,7 +19,7 @@ const registerValidation = [
     .withMessage("Password must contain an uppercase letter"),
 ];
 
-const googleLogin = async (req, res) => {
+const googleLogin = async (req, res, db) => {
   const { idToken } = req.body;
 
   try {
@@ -33,22 +32,21 @@ const googleLogin = async (req, res) => {
     if (!email_verified)
       return res.status(400).json({ message: "Unverified Google account." });
 
-    const [users] = await connect.execute(
-      "SELECT * FROM users WHERE email = ?",
-      [email],
-    );
+    const [users] = await db.all("SELECT * FROM users WHERE email = ?", [
+      email,
+    ]);
     let user = users[0];
 
     if (user) {
       if (!user.google_id) {
-        await connect.execute("UPDATE users SET google_id = ? WHERE id = ?", [
+        await db.run("UPDATE users SET google_id = ? WHERE id = ?", [
           googleId,
           user.id,
         ]);
         user.google_id = googleId;
       }
     } else {
-      const [result] = await connect.execute(
+      const [result] = await db.run(
         "INSERT INTO users (email, google_id, is_verified) VALUES (?, ?, ?)",
         [email, googleId, true],
       );
@@ -77,15 +75,14 @@ const googleLogin = async (req, res) => {
   }
 };
 
-const login = async (req, res) => {
+const login = async (req, res, db) => {
   const { email, password } = req.body;
 
   try {
-    const [rows] = await connect.execute(
-      "SELECT id, email, password, full_name, token_version FROM users WHERE email = ?",
+    const user = await db.get(
+      "SELECT id, email, password, fullName, tokenVersion FROM users WHERE email = ?",
       [email],
     );
-    const user = rows[0];
 
     if (!user || !user.password) {
       return res.status(401).json({ message: "Invalid email" });
@@ -130,7 +127,7 @@ const login = async (req, res) => {
       accessToken,
       user: {
         id: user.id,
-        name: user.full_name,
+        name: user.fullName,
         email: user.email,
       },
     });
@@ -140,7 +137,7 @@ const login = async (req, res) => {
   }
 };
 
-const register = async (req, res) => {
+const register = async (req, res, db) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
     return res.status(400).json({ errors: errors.array() });
@@ -149,15 +146,13 @@ const register = async (req, res) => {
   const { full_name, email, password } = req.body;
 
   try {
-    const [existingUser] = await connect.execute(
-      "SELECT id FROM users WHERE email = ?",
-      [email],
-    );
+    const existingUser = await db.all("SELECT id FROM users WHERE email = ?", [
+      email,
+    ]);
 
-    if (existingUser.length > 0) {
+    if (existingUser?.length > 0) {
       return res.status(409).json({ message: "Email already exists." });
     }
-
     const passwordWithPepper = password + process.env.PASSWORD_PEPPER;
     const hashedPassword = await argon2.hash(passwordWithPepper, {
       type: argon2.argon2id,
@@ -166,20 +161,24 @@ const register = async (req, res) => {
       parallelism: 1,
     });
 
-    const [result] = await connect.execute(
-      "INSERT INTO users (full_name, email, password) VALUES (?, ?, ?)",
-      [full_name, email, hashedPassword],
+    const userId = v4();
+
+    const result = await db.run(
+      "INSERT INTO users (id, fullName, email, password) VALUES (?, ?, ?, ?)",
+      [userId, full_name, email, hashedPassword],
     );
+    console.log(3, result);
 
     res.status(201).json({
       message: "User registered successfully.",
     });
   } catch (error) {
+    console.log(error);
     res.status(500).json({ message: "Internal server error." });
   }
 };
 
-const refreshToken = async (req, res) => {
+const refreshToken = async (req, res, db) => {
   const token = req.cookies.jid;
   if (!token) return res.status(401).send({ ok: false, accessToken: "" });
 
@@ -191,24 +190,23 @@ const refreshToken = async (req, res) => {
   }
 
   try {
-    const [rows] = await connect.execute(
-      "SELECT id, token_version, full_name FROM users WHERE id = ?",
+    const user = await db.get(
+      "SELECT id, tokenVersion, fullName FROM users WHERE id = ?",
       [payload.userId],
     );
-    const user = rows[0];
 
-    if (!user || user.token_version !== payload.version) {
+    if (!user || user.tokenVersion !== payload.version) {
       return res.status(401).send({ ok: false, accessToken: "" });
     }
 
     const accessToken = jwt.sign(
-      { userId: user.id, name: user.full_name },
+      { userId: user.id, name: user.fullName },
       process.env.ACCESS_TOKEN_SECRET,
       { expiresIn: "15m" },
     );
 
     const newRefreshToken = jwt.sign(
-      { userId: user.id, version: user.token_version },
+      { userId: user.id, version: user.tokenVersion },
       process.env.REFRESH_TOKEN_SECRET,
       { expiresIn: "7d" },
     );

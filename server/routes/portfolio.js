@@ -10,11 +10,16 @@ const {
   deletePortfolio,
 } = require("../utils/portfolio");
 
-router.post("/create", protect, createPortfolio);
-router.get("/", protect, getAllPortfolios);
-router.get("/:id", protect, getSinglePortfolio);
-router.get("/slug/:slug", getSinglePortfolioBySlug);
-router.put("/:id", protect, updatePortfolio);
-router.delete("/:id", protect, deletePortfolio);
+const portfolioRoutes = (db) => {
+  router.post("/create", protect, (req, res) => createPortfolio(req, res, db));
+  router.get("/", protect, (req, res) => getAllPortfolios(req, res, db));
+  router.get("/:id", protect, (req, res) => getSinglePortfolio(req, res, db));
+  router.get("/slug/:slug", (req, res) =>
+    getSinglePortfolioBySlug(req, res, db),
+  );
+  router.put("/:id", protect, (req, res) => updatePortfolio(req, res, db));
+  router.delete("/:id", protect, (req, res) => deletePortfolio(req, res, db));
+  return router;
+};
 
-module.exports = router;
+module.exports = portfolioRoutes;

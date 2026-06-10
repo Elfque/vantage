@@ -8,9 +8,15 @@ const {
   registerValidation,
 } = require("../utils/auth");
 
-router.post("/google", googleLogin);
-router.post("/login", login);
-router.post("/register", registerValidation, register);
-router.post("/refresh_token", refreshToken);
+function authRoutes(db) {
+  router.post("/google", (req, res) => googleLogin(req, res, db));
+  router.post("/login", (req, res) => login(req, res, db));
+  router.post("/register", registerValidation, (req, res) =>
+    register(req, res, db),
+  );
+  router.post("/refresh_token", (req, res) => refreshToken(req, res, db));
 
-module.exports = router;
+  return router;
+}
+
+module.exports = authRoutes;

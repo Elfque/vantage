@@ -1,7 +1,7 @@
 const connect = require("../db/db");
 const uuid = require("uuid");
 
-const createPortfolio = async (req, res) => {
+const createPortfolio = async (req, res, db) => {
   const {
     title,
     slug,
@@ -20,7 +20,7 @@ const createPortfolio = async (req, res) => {
   const newId = uuid.v4();
 
   try {
-    const [header] = await connect.execute(
+    const header = await db.run(
       "INSERT INTO portfolios (userId, title , slug, colorTheme, fullName, email, githubUrl, linkedlnUrl, description, id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
       [
         userId,
@@ -35,12 +35,13 @@ const createPortfolio = async (req, res) => {
         newId,
       ],
     );
-
+    console.log(header);
     // 2. Insert Projects
     if (projects && projects.length > 0) {
       for (const proj of projects) {
-        await connect.execute(
-          "INSERT INTO projects (portfolioId,  title, description, link, githubUrl, userId) VALUES (?, ?, ?, ?, ?,?)",
+        const projectId = uuid.v4();
+        await db.run(
+          "INSERT INTO projects (portfolioId,  title, description, link, githubUrl, userId,id) VALUES (?, ?, ?, ?, ?,?,?)",
           [
             newId,
             proj.title,
@@ -48,34 +49,39 @@ const createPortfolio = async (req, res) => {
             proj.link,
             proj.githubUrl,
             userId,
+            projectId,
           ],
         );
       }
     }
 
     // // 3. Insert Experience
-    // if (experience && experience.length > 0) {
-    //   for (const exp of experience) {
-    //     await connect.execute(
-    //       "INSERT INTO portfolio_experience (portfolio_id, company, position, description, start_date, end_date) VALUES (?, ?, ?, ?, ?, ?)",
-    //       [
-    //         newId,
-    //         exp.company,
-    //         exp.position,
-    //         JSON.stringify(exp.description),
-    //         exp.start_date,
-    //         exp.end_date,
-    //       ],
-    //     );
-    //   }
-    // }
+    if (experience && experience.length > 0) {
+      for (const exp of experience) {
+        const expId = uuid.v4();
+        await db.run(
+          "INSERT INTO experiences (portfolioId, company, role, description, startDate, endDate, userId, id) VALUES (?, ?, ?, ?, ?, ?,?,?)",
+          [
+            newId,
+            exp.company,
+            exp.role,
+            exp.description,
+            exp.startDate,
+            exp.endDate,
+            userId,
+            expId,
+          ],
+        );
+      }
+    }
 
     // 3. Insert Skills
     if (skills && skills.length > 0) {
       for (const exp of skills) {
-        await connect.execute(
-          "INSERT INTO skills (portfolioId, name, proficiency, userId) VALUES (?, ?, ?, ?)",
-          [newId, exp.name, exp.proficiency, userId],
+        const skillsId = uuid.v4();
+        await db.run(
+          "INSERT INTO skillCategory (portfolioId, skills, category, userId,id) VALUES (?, ?, ?, ?,?)",
+          [newId, JSON.stringify(exp.skills), exp.category, userId, skillsId],
         );
       }
     }
@@ -85,7 +91,6 @@ const createPortfolio = async (req, res) => {
       .json({ message: "Portfolio created successfully!", id: newId });
   } catch (error) {
     console.log(error);
-
     if (error.code === "ER_DUP_ENTRY") {
       return res
         .status(400)
@@ -95,11 +100,11 @@ const createPortfolio = async (req, res) => {
   }
 };
 
-const getAllPortfolios = async (req, res) => {
+const getAllPortfolios = async (req, res, db) => {
   const userId = req.user.userId;
 
   try {
-    const [portfolios] = await connect.execute(
+    const portfolios = await db.all(
       "SELECT id, title, slug, colorTheme, fullName, email, githubUrl, linkedlnUrl, description, createdAt FROM portfolios WHERE userId = ? ORDER BY createdAt DESC",
       [userId],
     );
@@ -115,12 +120,12 @@ const getAllPortfolios = async (req, res) => {
   }
 };
 
-const getSinglePortfolio = async (req, res) => {
+const getSinglePortfolio = async (req, res, db) => {
   const { id } = req.params;
   const userId = req.user.userId;
 
   try {
-    const [portfolio] = await connect.execute(
+    const portfolio = await db.all(
       "SELECT * FROM portfolios WHERE id = ? AND userId = ?",
       [id, userId],
     );
@@ -131,13 +136,18 @@ const getSinglePortfolio = async (req, res) => {
         .json({ message: "Portfolio not found or unauthorized." });
     }
 
-    const [projects] = await connect.execute(
+    const projects = await db.all(
       "SELECT * FROM projects WHERE portfolioId = ?",
       [id],
     );
 
-    const [skills] = await connect.execute(
-      "SELECT * FROM skills WHERE portfolioId = ?",
+    const skills = await db.all(
+      "SELECT * FROM skillCategory WHERE portfolioId = ?",
+      [id],
+    );
+
+    const experience = await db.all(
+      "SELECT * FROM experiences WHERE portfolioId = ?",
       [id],
     );
 
@@ -145,6 +155,7 @@ const getSinglePortfolio = async (req, res) => {
       ...portfolio[0],
       projects,
       skills,
+      experience,
     };
 
     res.status(200).json(fullPortfolio);
@@ -154,21 +165,29 @@ const getSinglePortfolio = async (req, res) => {
   }
 };
 
-const getSinglePortfolioBySlug = async (req, res) => {
+const getSinglePortfolioBySlug = async (req, res, db) => {
   const { slug } = req.params;
 
   try {
-    const [portfolio] = await connect.execute(
-      "SELECT * FROM portfolios WHERE slug = ?",
-      [slug],
-    );
+    const portfolio = await db.all("SELECT * FROM portfolios WHERE slug = ?", [
+      slug,
+    ]);
 
     if (portfolio.length === 0) {
       return res.status(404).json({ message: "Portfolio not found" });
     }
 
-    const [projects] = await connect.execute(
+    const projects = await db.all(
       "SELECT * FROM projects WHERE portfolioId = ?",
+      [portfolio[0].id],
+    );
+
+    const skills = await db.all(
+      "SELECT * FROM skillCategory WHERE portfolioId = ?",
+      [portfolio[0].id],
+    );
+    const experiences = await db.all(
+      "SELECT * FROM experiences WHERE portfolioId = ?",
       [portfolio[0].id],
     );
 
@@ -176,6 +195,8 @@ const getSinglePortfolioBySlug = async (req, res) => {
     const fullPortfolio = {
       ...rest,
       projects,
+      skills,
+      experiences,
     };
 
     res.status(200).json(fullPortfolio);
@@ -185,7 +206,7 @@ const getSinglePortfolioBySlug = async (req, res) => {
   }
 };
 
-const updatePortfolio = async (req, res) => {
+const updatePortfolio = async (req, res, db) => {
   const { id } = req.params;
   const userId = req.user.userId;
   const {
@@ -203,7 +224,7 @@ const updatePortfolio = async (req, res) => {
   } = req.body;
 
   try {
-    const [updateHeader] = await connect.execute(
+    const updateHeader = await db.run(
       "UPDATE portfolios SET title = ?, slug = ?, colorTheme = ?, fullName = ?, email = ?, githubUrl = ?, linkedlnUrl = ?, description = ? WHERE id = ? AND userId = ?",
       [
         title,
@@ -219,17 +240,16 @@ const updatePortfolio = async (req, res) => {
       ],
     );
 
-    if (updateHeader.affectedRows === 0) {
+    if (updateHeader.changes === 0) {
       return res
         .status(403)
         .json({ message: "Unauthorized or Portfolio not found." });
     }
 
     // Sync projects
-    const [rows] = await connect.execute(
-      "SELECT id FROM projects WHERE portfolioId = ?",
-      [id],
-    );
+    const rows = await db.all("SELECT id FROM projects WHERE portfolioId = ?", [
+      id,
+    ]);
     const existingIds = rows.map((r) => r.id);
     const incomingIds = projects
       .filter((item) => item.id)
@@ -237,14 +257,12 @@ const updatePortfolio = async (req, res) => {
 
     const idsToDelete = existingIds.filter((id) => !incomingIds.includes(id));
     if (idsToDelete.length > 0) {
-      await connect.query("DELETE FROM projects WHERE id IN (?)", [
-        idsToDelete,
-      ]);
+      await db.run("DELETE FROM projects WHERE id IN (?)", [idsToDelete]);
     }
 
     for (const proj of projects) {
       if (proj.id) {
-        await connect.execute(
+        await db.run(
           "UPDATE projects SET title = ?, description = ?, link = ?, githubUrl = ? WHERE id = ? AND portfolioId = ?",
           [
             proj.title,
@@ -256,19 +274,28 @@ const updatePortfolio = async (req, res) => {
           ],
         );
       } else {
-        await connect.execute(
-          "INSERT INTO projects (portfolioId, title, description, link, githubUrl) VALUES (?, ?, ?, ?, ?)",
-          [id, proj.title, proj.description, proj.link, proj.githubUrl],
+        const projectId = uuid.v4();
+        await db.run(
+          "INSERT INTO projects (portfolioId, title, description, link, githubUrl, id) VALUES (?, ?, ?, ?, ?, ?)",
+          [
+            id,
+            proj.title,
+            proj.description,
+            proj.link,
+            proj.githubUrl,
+            projectId,
+          ],
         );
       }
     }
 
     // Sync experience
     if (experience && Array.isArray(experience)) {
-      const [expRows] = await connect.execute(
+      const expRows = await db.all(
         "SELECT id FROM experiences WHERE portfolioId = ?",
         [id],
       );
+
       const existingExpIds = expRows.map((r) => r.id);
       const incomingExpIds = experience
         .filter((item) => item.id)
@@ -277,8 +304,9 @@ const updatePortfolio = async (req, res) => {
       const expIdsToDelete = existingExpIds.filter(
         (expId) => !incomingExpIds.includes(expId),
       );
+
       if (expIdsToDelete.length > 0) {
-        await connect.query("DELETE FROM experiences WHERE id IN (?)", [
+        await db.run("DELETE FROM experiences WHERE id IN (?)", [
           expIdsToDelete,
         ]);
       }
@@ -286,29 +314,31 @@ const updatePortfolio = async (req, res) => {
       for (const exp of experience) {
         if (exp.id) {
           // Update existing experience
-          await connect.execute(
-            "UPDATE portfolio_experience SET company = ?, position = ?, description = ?, start_date = ?, end_date = ? WHERE id = ? AND portfolio_id = ?",
+          await db.run(
+            "UPDATE experiences SET company = ?, role = ?, description = ?, startDate = ?, endDate = ? WHERE id = ? AND portfolioId = ?",
             [
               exp.company,
-              exp.position,
+              exp.role,
               exp.description,
-              exp.start_date,
-              exp.end_date,
+              exp.startDate,
+              exp.endDate,
               exp.id,
               id,
             ],
           );
         } else {
           // Insert new experience
-          await connect.execute(
-            "INSERT INTO portfolio_experience (portfolio_id, company, position, description, start_date, end_date) VALUES (?, ?, ?, ?, ?, ?)",
+          const experienceId = uuid.v4();
+          await db.run(
+            "INSERT INTO experiences (portfolioId, company, role, description, startDate, endDate, id) VALUES (?, ?, ?, ?, ?, ?, ?)",
             [
               id,
               exp.company,
-              exp.position,
+              exp.role,
               exp.description,
-              exp.start_date,
-              exp.end_date,
+              exp.startDate,
+              exp.endDate,
+              experienceId,
             ],
           );
         }
@@ -316,8 +346,8 @@ const updatePortfolio = async (req, res) => {
     }
 
     if (skills && Array.isArray(skills)) {
-      const [expRows] = await connect.execute(
-        "SELECT id FROM skills WHERE portfolioId = ?",
+      const expRows = await db.all(
+        "SELECT id FROM skillCategory WHERE portfolioId = ?",
         [id],
       );
       const existingSkillsIds = expRows.map((r) => r.id);
@@ -329,7 +359,7 @@ const updatePortfolio = async (req, res) => {
         (expId) => !incomingSkillsIds.includes(expId),
       );
       if (skillsIdsToDelete.length > 0) {
-        await connect.query("DELETE FROM skills WHERE id IN (?)", [
+        await db.run("DELETE FROM skillCategory WHERE id IN (?)", [
           skillsIdsToDelete,
         ]);
       }
@@ -337,15 +367,16 @@ const updatePortfolio = async (req, res) => {
       for (const skill of skills) {
         if (skill.id) {
           // Update existing experience
-          await connect.execute(
-            "UPDATE skills SET name = ?, proficiency = ? WHERE id = ? AND portfolioId = ?",
-            [skill.name, skill.proficiency, skill.id, id],
+          await db.run(
+            "UPDATE skillCategory SET skills = ?, category = ? WHERE id = ? AND portfolioId = ?",
+            [JSON.stringify(skill.skills), skill.category, skill.id, id],
           );
         } else {
           // Insert new experience
-          await connect.execute(
-            "INSERT INTO skills (portfolioId, name, proficiency, userId) VALUES (?, ?, ?, ?)",
-            [id, skill.name, skill.proficiency, userId],
+          const skillId = uuid.v4();
+          await db.run(
+            "INSERT INTO skillCategory (portfolioId, skills, category, userId, id) VALUES (?, ?, ?, ?, ?)",
+            [id, JSON.stringify(skill.skills), skill.category, userId, skillId],
           );
         }
       }
@@ -363,17 +394,17 @@ const updatePortfolio = async (req, res) => {
   }
 };
 
-const deletePortfolio = async (req, res) => {
+const deletePortfolio = async (req, res, db) => {
   const { id } = req.params;
   const { userId } = req.user;
 
   try {
-    const [result] = await connect.execute(
+    const result = await db.run(
       "DELETE FROM portfolios WHERE id = ? AND userId = ?",
       [id, userId],
     );
 
-    if (result.affectedRows === 0) {
+    if (result.changes === 0) {
       return res.status(404).json({
         success: false,
         message:

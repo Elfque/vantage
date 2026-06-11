@@ -7,8 +7,10 @@ type appType = {
 
 const AppLayout = ({ children }: appType) => {
   return (
-    <div className="grid grid-cols-[16rem_1fr] h-dvh">
-      <Sidebar />
+    <div className="grid grid-cols-1 md:grid-cols-[16rem_1fr] h-dvh">
+      <aside className="hidden md:block">
+        <Sidebar />
+      </aside>
       <div className="h-dvh overflow-y-auto">{children}</div>
     </div>
   );

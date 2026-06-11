@@ -32,7 +32,7 @@ const LoginPage = () => {
       window.location.replace("/");
     } else {
       showErrorToast(
-        "Login failed. Please check your credentials and try again."
+        "Login failed. Please check your credentials and try again.",
       );
     }
 

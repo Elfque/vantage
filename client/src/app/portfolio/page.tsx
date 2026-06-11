@@ -9,7 +9,6 @@ import { showErrorToast, showSuccessToast } from "@/utils/ToasterProps";
 import { FaEye, FaEdit, FaTrash, FaPlus } from "react-icons/fa";
 import Link from "next/link";
 import DeleteModal from "@/components/resumes/DeleteModal";
-import { formatDate } from "@/utils/functions";
 
 interface PortfolioResponseData {
   id: string;

@@ -75,7 +75,7 @@ const SortableExperienceItem = memo(
             Remove
           </button>
         </div>
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
             <Input
               type="text"
@@ -140,7 +140,7 @@ const SortableExperienceItem = memo(
         </div>
       </div>
     );
-  }
+  },
 );
 
 const Experiences = ({ experience, setExperience }: ExperienceProp) => {
@@ -162,21 +162,21 @@ const Experiences = ({ experience, setExperience }: ExperienceProp) => {
   const updateExperience = (id: number, field: string, value: string) => {
     setExperience((prev) =>
       prev.map((exp, index) =>
-        index === id ? { ...exp, [field]: value } : exp
-      )
+        index === id ? { ...exp, [field]: value } : exp,
+      ),
     );
   };
 
   const removeExperience = (id: number) => {
     setExperience((prev: SingleResumeExperience[]) =>
-      prev.filter((exp) => exp.id !== id)
+      prev.filter((exp) => exp.id !== id),
     );
   };
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
       activationConstraint: { distance: 8 },
-    })
+    }),
   );
 
   const handleDragEnd = (event: DragEndEvent) => {

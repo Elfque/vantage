@@ -1,6 +1,12 @@
 import React, { useState, useEffect } from "react";
 import { getAPIRequest } from "@/utils/requests";
-import { FaMousePointer, FaCheck, FaTimes, FaEye, FaEdit } from "react-icons/fa";
+import {
+  FaMousePointer,
+  FaCheck,
+  FaTimes,
+  FaEye,
+  FaEdit,
+} from "react-icons/fa";
 
 interface Item {
   id: string;
@@ -54,7 +60,7 @@ const AttachmentSelector: React.FC<AttachmentSelectorProps> = ({
     (item) =>
       item.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
       (item.full_name &&
-        item.full_name.toLowerCase().includes(searchTerm.toLowerCase()))
+        item.full_name.toLowerCase().includes(searchTerm.toLowerCase())),
   );
 
   const selectedItem = selectedId
@@ -63,13 +69,13 @@ const AttachmentSelector: React.FC<AttachmentSelectorProps> = ({
 
   return (
     <div className="space-y-4">
-      <div className="flex justify-between items-center">
+      <div className="flex flex-col md:flex-row md:justify-between md:items-center">
         <h3 className="text-lg font-medium text-gray-900 dark:text-white">
           {label}
         </h3>
         <button
           onClick={() => setShowSelector(!showSelector)}
-          className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded-md text-sm flex items-center gap-2"
+          className="mt-2 md:mt-0 bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded-md text-sm flex items-center gap-2"
         >
           <FaMousePointer className="text-xs" />
           {selectedId ? "Change" : "Select"}{" "}

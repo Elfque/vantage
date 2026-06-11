@@ -15,7 +15,7 @@ const PersonalInfo = ({
       <h3 className="text-lg font-medium text-gray-900 dark:text-white">
         Personal Information
       </h3>
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
           <Input
             type="text"

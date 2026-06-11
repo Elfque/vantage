@@ -1,8 +1,6 @@
 import NextAuth from "next-auth";
 import GoogleProvider from "next-auth/providers/google";
 import CredentialsProvider from "next-auth/providers/credentials";
-import type { Session } from "next-auth";
-import type { JWT } from "next-auth/jwt";
 
 declare module "next-auth" {
   interface Session {
@@ -74,8 +72,8 @@ const handler = NextAuth({
     signIn: "/auth",
   },
   callbacks: {
-    async signIn({ user, account, profile }) {
-      if (account?.provider === "google") {
+    async jwt({ token, account }: any) {
+      if (account) {
         try {
           const response = await fetch(
             `${process.env.NEXT_PUBLIC_BASEURL}/auth/google`,
@@ -88,24 +86,14 @@ const handler = NextAuth({
 
           if (response.ok) {
             const data = await response.json();
-
-            user.accessToken = data.accessToken;
-            return true;
+            token.accessToken = data.accessToken;
+          } else {
+            return null;
           }
-          return false;
         } catch (error) {
-          console.error("Backend Google Sync Error:", error);
-          return false;
+          console.error("Backend Sync Error:", error);
+          return null;
         }
-      }
-      return true;
-    },
-    async jwt({ token, account, user }) {
-      if (account) {
-        token.accessToken = account.accessToken as string;
-      }
-      if (user) {
-        token.accessToken = (user as any).token;
       }
       return token;
     },

@@ -33,7 +33,7 @@ const SortableSkillItem = memo(
     setEditingId: (id: number | null) => void;
     updateSkill: (
       id: number,
-      e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+      e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>,
     ) => void;
     removeSkill: (id: number) => void;
   }) => {
@@ -53,7 +53,7 @@ const SortableSkillItem = memo(
         ref={setNodeRef}
         style={style}
         {...attributes}
-        className="grid grid-cols-[2rem_1fr_2rem] items-center gap-2 mb-2"
+        className="grid grid-cols-1 md:grid-cols-[2rem_1fr_2rem] items-center gap-2 mb-2"
       >
         <div
           {...listeners}
@@ -92,7 +92,7 @@ const SortableSkillItem = memo(
         </button>
       </div>
     );
-  }
+  },
 );
 
 SortableSkillItem.displayName = "SortableSkillItem";
@@ -108,7 +108,7 @@ export default function Skills({ skills, setSkills }: SkillsProps) {
   const sensors = useSensors(
     useSensor(PointerSensor, {
       activationConstraint: { distance: 8 },
-    })
+    }),
   );
 
   const handleDragEnd = (event: DragEndEvent) => {
@@ -124,14 +124,14 @@ export default function Skills({ skills, setSkills }: SkillsProps) {
 
   const updateSkill = (
     id: number,
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>,
   ) => {
     const { name, value } = e.target;
 
     setSkills((prev) =>
       prev.map((skill) =>
-        skill.id === id ? { ...skill, [name]: value } : skill
-      )
+        skill.id === id ? { ...skill, [name]: value } : skill,
+      ),
     );
   };
 

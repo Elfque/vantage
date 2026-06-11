@@ -27,39 +27,53 @@ const googleLogin = async (req, res, db) => {
       idToken,
       audience: process.env.GOOGLE_CLIENT_ID,
     });
-    const { email, sub: googleId, email_verified } = ticket.getPayload();
+    const { email, sub: googleId, email_verified, name } = ticket.getPayload();
 
     if (!email_verified)
       return res.status(400).json({ message: "Unverified Google account." });
 
-    const [users] = await db.all("SELECT * FROM users WHERE email = ?", [
-      email,
-    ]);
+    const users = await db.all("SELECT * FROM users WHERE email = ?", [email]);
     let user = users[0];
 
     if (user) {
-      if (!user.google_id) {
-        await db.run("UPDATE users SET google_id = ? WHERE id = ?", [
+      if (!user.googleId) {
+        await db.run("UPDATE users SET googleId = ? WHERE id = ?", [
           googleId,
           user.id,
         ]);
-        user.google_id = googleId;
+        user.googleId = googleId;
       }
     } else {
-      const [result] = await db.run(
-        "INSERT INTO users (email, google_id, is_verified) VALUES (?, ?, ?)",
-        [email, googleId, true],
+      const userId = v4();
+      await db.run(
+        "INSERT INTO users (id, email, googleId, isVerified, fullName) VALUES (?, ?, ?,?,?)",
+        [userId, email, googleId, 1, name],
       );
       user = {
-        id: result.insertId,
+        id: userId,
         email,
-        google_id: googleId,
-        token_version: 0,
+        googleId,
+        tokenVersion: 0,
       };
     }
 
-    const accessToken = generateAccessToken(user);
-    const refreshToken = generateRefreshToken(user);
+    const accessToken = jwt.sign(
+      {
+        userId: user.id,
+        name: user.fullName,
+      },
+      process.env.ACCESS_TOKEN_SECRET,
+      { expiresIn: "3d" },
+    );
+
+    const refreshToken = jwt.sign(
+      {
+        userId: user.id,
+        version: user.tokenVersion,
+      },
+      process.env.REFRESH_TOKEN_SECRET,
+      { expiresIn: "7d" },
+    );
 
     res.cookie("jid", refreshToken, {
       httpOnly: true,
@@ -68,7 +82,14 @@ const googleLogin = async (req, res, db) => {
       path: "/api/auth/refresh_token",
     });
 
-    res.json({ accessToken });
+    res.json({
+      accessToken,
+      user: {
+        id: user.id,
+        name: name,
+        email: user.email,
+      },
+    });
   } catch (error) {
     console.error(error);
     res.status(401).json({ message: "Authentication failed." });

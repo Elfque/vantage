@@ -1,4 +1,3 @@
-const connect = require("../db/db");
 const uuid = require("uuid");
 
 const createPortfolio = async (req, res, db) => {

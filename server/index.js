@@ -27,7 +27,7 @@ const startServer = async () => {
     console.log("Database connection established");
 
     await db.exec(
-      `CREATE TABLE IF NOT EXISTS users (id CHAR(36) PRIMARY KEY, email VARCHAR(255) UNIQUE NOT NULL, fullName VARCHAR(100) NOT NULL, tokenVersion INTEGER, password VARCHAR(255) NOT NULL, createdAt DATETIME DEFAULT CURRENT_TIMESTAMP, updatedAt DATETIME DEFAULT CURRENT_TIMESTAMP)
+      `CREATE TABLE IF NOT EXISTS users (id CHAR(36) PRIMARY KEY, email VARCHAR(255) UNIQUE NOT NULL, fullName VARCHAR(100) NOT NULL, tokenVersion INTEGER, password VARCHAR(255), createdAt DATETIME DEFAULT CURRENT_TIMESTAMP, updatedAt DATETIME DEFAULT CURRENT_TIMESTAMP, isVerified BOOLEAN DEFAULT 0, googleId TEXT DEFAULT NULL)
     `,
     );
     await db.exec(`

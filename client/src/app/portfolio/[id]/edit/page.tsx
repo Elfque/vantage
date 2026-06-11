@@ -81,7 +81,7 @@ export default function EditPortfolioPage() {
     } catch (error) {
       console.error("Error fetching portfolio:", error);
       showErrorToast("Failed to load portfolio");
-      //   router.push("/portfolio");
+      
     } finally {
       setLoading(false);
     }

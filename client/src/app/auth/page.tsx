@@ -12,7 +12,7 @@ const LoginPage = () => {
 
   const handleGoogleSignIn = async () => {
     try {
-      await signIn("google", { callbackUrl: "/" });
+      await signIn("google", { callbackUrl: "/dashboard" });
     } catch (error) {
       console.error("Google sign-in error:", error);
     }
@@ -29,7 +29,7 @@ const LoginPage = () => {
     });
 
     if (result?.ok) {
-      window.location.replace("/");
+      window.location.replace("/dashboard");
     } else {
       showErrorToast(
         "Login failed. Please check your credentials and try again.",
